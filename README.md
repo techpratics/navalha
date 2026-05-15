@@ -60,6 +60,7 @@ O projeto foi desenvolvido utilizando a metodologia ágil **Kanban**, com organi
 | Ferramenta | Finalidade | Link |
 |------|------|------|
 | Trello | Gestão Kanban | [💈projeto-barbearia-kanban-💈](https://trello.com/invite/b/69dd3ec0528d4ed11aedb289/ATTI77545c6596f3503003b07e281428e1e0A0854026/💈projeto-barbearia-kanban-💈) |
+| Docs | Documento de Requisitos | [Link](https://docs.google.com/document/d/14TAXifBhv1Tt1Tm4cGVbhKHskTcMTCM3/edit?usp=drive_link&ouid=109597382508282434795&rtpof=true&sd=true)
 | Google Drive | Documentação do Projeto | [Drive](https://drive.google.com/drive/folders/1pwW3LjfzHrEeARXwzhax_helfkJhnfj_?usp=sharing) |
 
 ---
