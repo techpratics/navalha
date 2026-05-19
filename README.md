@@ -10,7 +10,7 @@ Sistema web desenvolvido para gerenciamento de uma barbearia, com foco em agenda
 
 | Nome | GitHub |
 |------|------|
-| Arthur Lelis | [@Arthur32p](https://github.com/Artur32p) |
+| Arthur Lelis | [@Arthur32p](https://github.com/Arthur32p) |
 | Julio Emanuel | [@DevJulioEmanuel](https://github.com/DevJulioEmanuel) |
 | Mateus Valentim | [@mattsu014](https://github.com/mattsu014) |
 | Victor Farias | [@vistomia](https://github.com/vistomia) |
