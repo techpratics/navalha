@@ -10,7 +10,10 @@ Sistema web desenvolvido para gerenciamento de uma barbearia, com foco em agenda
 
 | Nome | GitHub |
 |------|------|
+| Arthur Lelis | [@Arthur32p](https://github.com/Artur32p) |
+| Julio Emanuel | [@DevJulioEmanuel](https://github.com/DevJulioEmanuel) |
 | Mateus Valentim | [@mattsu014](https://github.com/mattsu014) |
+| Victor Farias | [@vistomia](https://github.com/vistomia) |
 | Rodrigo Rodrigues | [@rudriguu2099](https://github.com/rudriguu2099) |
 ---
 
@@ -59,7 +62,7 @@ O projeto foi desenvolvido utilizando a metodologia ágil **Kanban**, com organi
 
 | Ferramenta | Finalidade | Link |
 |------|------|------|
-| Trello | Gestão Kanban | [💈projeto-barbearia-kanban-💈](https://trello.com/invite/b/69dd3ec0528d4ed11aedb289/ATTI77545c6596f3503003b07e281428e1e0A0854026/💈projeto-barbearia-kanban-💈) |
+| ClickUp | Board | [Link](https://app.clickup.com/90171245411/v/s/90175723797) |
 | Docs | Documento de Requisitos | [Link](https://docs.google.com/document/d/14TAXifBhv1Tt1Tm4cGVbhKHskTcMTCM3/edit?usp=drive_link&ouid=109597382508282434795&rtpof=true&sd=true)
 | Google Drive | Documentação do Projeto | [Drive](https://drive.google.com/drive/folders/1pwW3LjfzHrEeARXwzhax_helfkJhnfj_?usp=sharing) |
 
