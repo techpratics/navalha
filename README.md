@@ -69,8 +69,8 @@ O projeto foi desenvolvido utilizando a metodologia ágil **Kanban**, com organi
 ---
 ## ⚒️ Stack
 ### 🎨 Frontend
+- React
 - Typescript 
-- Next.js 
 - Tailwind CSS
 
 
