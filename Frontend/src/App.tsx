@@ -1,7 +1,7 @@
-import LoginPage from './pages/auth/LoginPage'
+import AgendamentoPage from './pages/client/AgendamentoPage'
 
 function App() {
-  return <LoginPage />
+  return <AgendamentoPage />
 }
 
 export default App

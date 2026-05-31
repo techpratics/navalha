@@ -15,11 +15,11 @@ export default function LoginPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
     console.log('Login:', form)
-    // aqui vai chamar o service quando conectar com o back
-  }
+    
+}
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4">
