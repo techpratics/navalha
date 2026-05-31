@@ -21,3 +21,15 @@ export interface BookingState {
   serviceDuration: number | null
   servicePrice: number | null
 }
+
+export interface Appointment {
+  id: string
+  professionalName: string
+  professionalInitials: string
+  serviceName: string
+  date: string
+  time: string
+  durationMinutes: number
+  priceInCents: number
+  status: 'confirmed' | 'pending' | 'cancelled'
+}
