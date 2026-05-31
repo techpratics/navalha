@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { Scissors, Calendar, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Scissors, Calendar, CalendarPlus, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <aside className={`h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col transition-all duration-300 ${collapsed ? 'w-12 md:w-16' : 'w-12 md:w-52'}`}>
@@ -31,10 +34,33 @@ export default function Sidebar() {
         <p className={`text-zinc-500 text-xs px-2 mb-2 hidden ${collapsed ? '' : 'md:block'}`}>
           Menu Principal
         </p>
-        <button className="flex items-center justify-center md:justify-start gap-3 px-2 md:px-3 py-2 rounded-lg bg-amber-500/10 text-amber-500 w-full">
+
+        <button
+          onClick={() => navigate('/client/agendar')}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors ${
+            location.pathname === '/client/agendar'
+              ? 'bg-amber-500/10 text-amber-500'
+              : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <CalendarPlus size={16} />
+          <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
+            <span className="text-sm font-medium">Agendar</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => navigate('/client/agendamentos')}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors ${
+            location.pathname === '/client/agendamentos'
+              ? 'bg-amber-500/10 text-amber-500'
+              : 'text-zinc-400 hover:text-white'
+          }`}
+        >
           <Calendar size={16} />
           <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
-            <span className="text-sm font-medium">Agenda</span>
+            <span className="text-sm font-medium">Agendamentos</span>
+            <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
           </div>
         </button>
       </nav>

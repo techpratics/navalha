@@ -1,7 +1,7 @@
-import Appointment from './pages/client/AppointmentsPage'
+import AppRoutes from './routes'
 
 function App() {
-  return <Appointment />
+  return <AppRoutes />
 }
 
 export default App

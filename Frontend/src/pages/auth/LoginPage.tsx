@@ -5,6 +5,7 @@ import Logo from '../../components/auth/Logo'
 import RoleSelector from '../../components/auth/RoleSelector'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
+import { useLogin } from '../../hooks/useLogin'
 
 export default function LoginPage() {
   const [form, setForm] = useState<LoginFormData>({
@@ -15,11 +16,12 @@ export default function LoginPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
 
-  function handleSubmit(e: React.SubmitEvent) {
+  const { login, loading, error } = useLogin()
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    console.log('Login:', form)
-    
-}
+    login(form)
+  }
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4">
@@ -79,8 +81,12 @@ export default function LoginPage() {
             <span className="text-zinc-400 text-sm">Manter conectado</span>
           </label>
 
-          <Button type="submit" variant="primary">
-            Entrar
+          {error && (
+            <p className="text-red-400 text-sm text-center">{error}</p>
+          )}
+
+          <Button type="submit" variant="primary" disabled={loading}>
+            {loading ? 'Entrando...' : 'Entrar'}
           </Button>
 
         </form>

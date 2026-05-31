@@ -3,8 +3,8 @@ import Step1DateTime from './steps/Step1DateTime'
 import Step2Professional from './steps/Step2Professional'
 import Step3Service from './steps/Step3Service'
 import Step4Confirm from './steps/Step4Confirm'
-import Stepper from '../../components/client/Stepper'
-import { useAgendamento } from '../../hooks/useAgendamento'
+import Stepper from '../../components/booking/Stepper'
+import { useAgendamento } from '../../hooks/useBookings'
 
 
 const stepLabels = ['Data/Hora', 'Profissional', 'Servico', 'Confirmar']
