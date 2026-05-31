@@ -66,7 +66,7 @@ export default function Sidebar() {
           <Calendar size={16} />
           <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
             <span className="text-sm font-medium">Agendamentos</span>
-            <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">8</span>
+            <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
           </div>
         </button>
       </nav>

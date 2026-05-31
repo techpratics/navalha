@@ -20,7 +20,7 @@ export default function Input({
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label className="text-white text-sm font-medium">{label}</label>
+        <label style={{ color: 'var(--text-primary)' }} className="text-sm font-medium">{label}</label>
       )}
       <div className="relative">
         <input
@@ -28,7 +28,12 @@ export default function Input({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className={`w-full bg-zinc-800 text-white placeholder-zinc-500 rounded-lg px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-amber-500 ${className}`}
+          style={{
+            backgroundColor: 'var(--bg-elevated)',
+            color: 'var(--text-primary)',
+            borderColor: 'var(--border)',
+          }}
+          className={`w-full rounded-lg px-4 py-3 text-sm outline-none border focus:border-amber-500 transition-colors ${className}`}
         />
         {rightElement && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">

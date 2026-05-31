@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Eye, EyeOff, Sun, Moon } from 'lucide-react'
+import { useTheme } from '../../hooks/useTheme'
 import type { LoginFormData } from '../../types/auth'
-import { Eye, EyeOff } from 'lucide-react'
 import Logo from '../../components/auth/Logo'
 import RoleSelector from '../../components/auth/RoleSelector'
 import Input from '../../components/ui/Input'
@@ -15,8 +16,9 @@ export default function LoginPage() {
     rememberMe: false,
   })
   const [showPassword, setShowPassword] = useState(false)
-
   const { login, loading, error } = useLogin()
+
+  const { isDark, toggleTheme } = useTheme()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -24,13 +26,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4">
-
+    <div
+      style={{ backgroundColor: 'var(--bg-base)' }}
+      className="min-h-screen flex flex-col items-center justify-center px-4"
+    >
+      {/* Botão de tema */}
+      <button
+        onClick={toggleTheme}
+        style={{ color: 'var(--text-secondary)' }}
+        className="absolute top-4 right-4 hover:opacity-80 transition-colors"
+      >
+        {isDark ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
       <Logo />
 
-      <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-8">
-        <h2 className="text-white text-xl font-semibold mb-1">Entrar na sua conta</h2>
-        <p className="text-zinc-400 text-sm mb-6">Selecione o tipo de acesso e digite suas credenciais</p>
+      <div
+        style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
+        className="w-full max-w-md rounded-2xl border p-8"
+      >
+        <h2 style={{ color: 'var(--text-primary)' }} className="text-xl font-semibold mb-1">
+          Entrar na sua conta
+        </h2>
+        <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-6">
+          Selecione o tipo de acesso e digite suas credenciais
+        </p>
 
         <RoleSelector
           selected={form.role}
@@ -49,8 +68,8 @@ export default function LoginPage() {
 
           <div className="flex flex-col gap-1">
             <div className="flex justify-between">
-              <label className="text-white text-sm font-medium">Senha</label>
-              <button type="button" className="text-zinc-400 text-sm hover:text-white">
+              <label style={{ color: 'var(--text-primary)' }} className="text-sm font-medium">Senha</label>
+              <button type="button" style={{ color: 'var(--text-secondary)' }} className="text-sm hover:opacity-80">
                 Esqueceu a senha?
               </button>
             </div>
@@ -63,7 +82,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
-                  className="text-zinc-400 hover:text-white text-sm"
+                  style={{ color: 'var(--text-secondary)' }}
+                  className="hover:opacity-80"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -78,11 +98,11 @@ export default function LoginPage() {
               onChange={e => setForm(f => ({ ...f, rememberMe: e.target.checked }))}
               className="accent-amber-500"
             />
-            <span className="text-zinc-400 text-sm">Manter conectado</span>
+            <span style={{ color: 'var(--text-secondary)' }} className="text-sm">Manter conectado</span>
           </label>
 
           {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
+            <p className="text-red-500 text-sm text-center">{error}</p>
           )}
 
           <Button type="submit" variant="primary" disabled={loading}>
@@ -92,7 +112,9 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <p className="text-zinc-600 text-xs mt-8">© 2026 BarberPro. Todos os direitos reservados.</p>
+      <p style={{ color: 'var(--text-muted)' }} className="text-xs mt-8">
+        © 2026 BarberPro. Todos os direitos reservados.
+      </p>
     </div>
   )
 }
