@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, User, Phone, Mail, Calendar, TrendingUp } from 'lucide-react'
+import { Search, User, Phone, Mail, Calendar } from 'lucide-react'
 import ProfessionalLayout from '../../components/layout/ProfessionalLayout'
 import { useClients } from '../../hooks/useClients'
 import Input from '../../components/ui/Input'
@@ -7,7 +7,7 @@ import Input from '../../components/ui/Input'
 export default function ClientsPage() {
   const { clients } = useClients()
   const [search, setSearch] = useState('')
-  const [filterFrequent, setFilterFrequent] = useState(false)
+  const [filterFrequent] = useState(false)
 
   const filteredClients = useMemo(() => {
     return clients

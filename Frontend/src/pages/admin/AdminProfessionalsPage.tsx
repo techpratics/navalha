@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, Scissors, Phone, Mail, UserX, UserCheck, Filter, AlertTriangle, X } from 'lucide-react'
+import { Search, Scissors, Phone, Mail, UserX, UserCheck, Filter, AlertTriangle } from 'lucide-react'
 import AdminLayout from '../../components/layout/AdminLayout'
 import { useProfessionals } from '../../hooks/useProfessionals'
 import Input from '../../components/ui/Input'

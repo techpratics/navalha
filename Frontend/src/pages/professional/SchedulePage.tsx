@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, X, Check, Clock, User, Scissors, AlertCircle } from 'lucide-react'
+import { Plus, X, Clock, User, Scissors, AlertCircle } from 'lucide-react'
 import ProfessionalLayout from '../../components/layout/ProfessionalLayout'
 import AppointmentList from '../../components/appointments/AppointmentList'
 import { useAppointments } from '../../hooks/useAppointments'
@@ -181,7 +181,7 @@ export default function SchedulePage() {
               <div className="flex gap-3 pt-4">
                 <Button 
                   type="button"
-                  variant="undefined" 
+                  variant="secondary" 
                   onClick={() => { setIsModalOpen(false); setError(null); }}
                   className="flex-1"
                 >

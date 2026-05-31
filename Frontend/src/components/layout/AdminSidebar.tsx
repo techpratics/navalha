@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Scissors, UserPlus, Users, PanelLeftClose, PanelLeftOpen, Contact2 } from 'lucide-react'
+import { Scissors, UserPlus, Users, PanelLeftClose, PanelLeftOpen, Briefcase } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function AdminSidebar() {
@@ -10,7 +10,7 @@ export default function AdminSidebar() {
   const menuItems = [
     { path: '/admin/cadastro-cliente', label: 'Cadastrar Cliente', icon: UserPlus },
     { path: '/admin/clientes', label: 'Clientes', icon: Users },
-    { path: '/admin/cadastro-profissional', label: 'Cadastrar Profissional', icon: Contact2 },
+    { path: '/admin/cadastro-profissional', label: 'Cadastrar Profissional', icon: Briefcase },
     { path: '/admin/profissionais', label: 'Profissionais', icon: Scissors },
   ]
 
@@ -18,7 +18,7 @@ export default function AdminSidebar() {
   return (
     <aside
       style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
-      className={`h-screen border-r flex flex-col transition-all duration-300 ${collapsed ? 'w-12 md:w-16' : 'w-12 md:w-52'}`}
+      className={`h-screen border-r flex flex-col transition-all duration-300 ${collapsed ? 'w-12 md:w-16' : 'w-12 md:w-60'}`}
     >
       <div
         style={{ borderColor: 'var(--border)' }}
@@ -59,7 +59,7 @@ export default function AdminSidebar() {
           >
             <item.icon size={16} />
             <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
             </div>
           </button>
         ))}

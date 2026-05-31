@@ -1,12 +1,13 @@
 interface InputProps {
   label?: string
-  type?: 'text' | 'email' | 'password'
+  type?: 'text' | 'email' | 'password' | 'time' | 'number'
   placeholder?: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   rightElement?: React.ReactNode
   leftElement?: React.ReactNode
   className?: string
+  error?: string
 }
 
 export default function Input({
@@ -18,6 +19,7 @@ export default function Input({
   rightElement,
   leftElement,
   className = '',
+  error,
 }: InputProps) {
   return (
     <div className="flex flex-col gap-1">
@@ -38,7 +40,7 @@ export default function Input({
           style={{
             backgroundColor: 'var(--bg-elevated)',
             color: 'var(--text-primary)',
-            borderColor: 'var(--border)',
+            borderColor: error ? '#ef4444' : 'var(--border)',
           }}
           className={`w-full rounded-lg ${leftElement ? 'pl-10' : 'px-4'} py-3 text-sm outline-none border focus:border-amber-500 transition-colors ${className}`}
         />
@@ -48,6 +50,9 @@ export default function Input({
           </div>
         )}
       </div>
+      {error && (
+        <span className="text-xs text-red-500 mt-1">{error}</span>
+      )}
     </div>
   )
 }
