@@ -9,9 +9,12 @@ interface AppointmentListProps {
 export default function AppointmentList({ appointments }: AppointmentListProps) {
   if (appointments.length === 0) {
     return (
-      <div className="bg-zinc-900 rounded-2xl p-8 flex flex-col items-center gap-3">
-        <Calendar size={32} className="text-zinc-600" />
-        <p className="text-zinc-400">Nenhum agendamento futuro</p>
+      <div
+        style={{ backgroundColor: 'var(--bg-surface)' }}
+        className="rounded-2xl p-8 flex flex-col items-center gap-3"
+      >
+        <Calendar size={32} style={{ color: 'var(--text-muted)' }} />
+        <p style={{ color: 'var(--text-secondary)' }}>Nenhum agendamento futuro</p>
       </div>
     )
   }

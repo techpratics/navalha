@@ -8,22 +8,28 @@ export default function Sidebar() {
   const location = useLocation()
 
   return (
-    <aside className={`h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col transition-all duration-300 ${collapsed ? 'w-12 md:w-16' : 'w-12 md:w-52'}`}>
-
+    <aside
+      style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
+      className={`h-screen border-r flex flex-col transition-all duration-300 ${collapsed ? 'w-12 md:w-16' : 'w-12 md:w-52'}`}
+    >
       {/* Topo */}
-      <div className="flex items-center justify-between px-2 md:px-4 py-4 border-b border-zinc-800">
+      <div
+        style={{ borderColor: 'var(--border)' }}
+        className="flex items-center justify-between px-2 md:px-4 py-4 border-b"
+      >
         <div className={`items-center gap-2 hidden md:flex ${collapsed ? 'md:hidden' : ''}`}>
           <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
             <Scissors size={14} className="text-black" />
           </div>
           <div>
-            <p className="text-white text-sm font-bold leading-none">Navalha</p>
-            <p className="text-zinc-500 text-xs">Cliente</p>
+            <p style={{ color: 'var(--text-primary)' }} className="text-sm font-bold leading-none">Navalha</p>
+            <p style={{ color: 'var(--text-muted)' }} className="text-xs">Cliente</p>
           </div>
         </div>
         <button
           onClick={() => setCollapsed(v => !v)}
-          className="text-zinc-400 hover:text-white transition-colors mx-auto md:mx-0"
+          style={{ color: 'var(--text-secondary)' }}
+          className="transition-colors mx-auto md:mx-0 hover:opacity-80"
         >
           {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
         </button>
@@ -31,17 +37,17 @@ export default function Sidebar() {
 
       {/* Menu */}
       <nav className="flex flex-col gap-1 px-1 md:px-2 py-4">
-        <p className={`text-zinc-500 text-xs px-2 mb-2 hidden ${collapsed ? '' : 'md:block'}`}>
+        <p style={{ color: 'var(--text-muted)' }} className={`text-xs px-2 mb-2 hidden ${collapsed ? '' : 'md:block'}`}>
           Menu Principal
         </p>
 
         <button
           onClick={() => navigate('/client/agendar')}
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors ${
-            location.pathname === '/client/agendar'
-              ? 'bg-amber-500/10 text-amber-500'
-              : 'text-zinc-400 hover:text-white'
-          }`}
+          style={{
+            backgroundColor: location.pathname === '/client/agendar' ? 'rgba(245,158,11,0.1)' : 'transparent',
+            color: location.pathname === '/client/agendar' ? 'var(--brand)' : 'var(--text-secondary)',
+          }}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors hover:opacity-80"
         >
           <CalendarPlus size={16} />
           <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
@@ -51,20 +57,19 @@ export default function Sidebar() {
 
         <button
           onClick={() => navigate('/client/agendamentos')}
-          className={`flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors ${
-            location.pathname === '/client/agendamentos'
-              ? 'bg-amber-500/10 text-amber-500'
-              : 'text-zinc-400 hover:text-white'
-          }`}
+          style={{
+            backgroundColor: location.pathname === '/client/agendamentos' ? 'rgba(245,158,11,0.1)' : 'transparent',
+            color: location.pathname === '/client/agendamentos' ? 'var(--brand)' : 'var(--text-secondary)',
+          }}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors hover:opacity-80"
         >
           <Calendar size={16} />
           <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
             <span className="text-sm font-medium">Agendamentos</span>
-            <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
+            <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">8</span>
           </div>
         </button>
       </nav>
-
     </aside>
   )
 }

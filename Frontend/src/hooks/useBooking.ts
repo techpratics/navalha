@@ -13,7 +13,7 @@ const initialState: BookingState = {
   servicePrice: null,
 }
 
-export function useAgendamento() {
+export function useBooking() {
   const [booking, setBooking] = useState<BookingState>(initialState)
 
   function nextStep(data: Partial<BookingState>) {

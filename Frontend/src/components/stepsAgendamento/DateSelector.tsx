@@ -20,13 +20,14 @@ export default function DateSelector({ days, selectedDate, onSelect }: DateSelec
           key={d.date}
           disabled={d.disabled}
           onClick={() => onSelect(d.date)}
-          className={`flex flex-col items-center min-w-[64px] py-3 px-2 rounded-xl border transition-colors ${
+          style={
             d.disabled
-              ? 'border-zinc-800 text-zinc-600 cursor-not-allowed'
+              ? { borderColor: 'var(--border)', color: 'var(--text-muted)' }
               : selectedDate === d.date
-                ? 'border-amber-500 bg-amber-500 text-black'
-                : 'border-zinc-700 text-white hover:border-zinc-500'
-          }`}
+                ? { backgroundColor: 'var(--brand)', borderColor: 'var(--brand)', color: '#000' }
+                : { borderColor: 'var(--border)', color: 'var(--text-primary)' }
+          }
+          className="flex flex-col items-center min-w-[64px] py-3 px-2 rounded-xl border transition-colors disabled:cursor-not-allowed"
         >
           <span className="text-[10px] font-medium">{d.label}</span>
           <span className="text-xl font-bold">{d.day}</span>

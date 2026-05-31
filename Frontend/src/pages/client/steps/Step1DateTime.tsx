@@ -86,9 +86,9 @@ export default function Step1DateTime({ onNext }: Props) {
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
 
-      <div className="bg-zinc-900 rounded-2xl p-4 md:p-6">
-        <h2 className="text-white font-semibold flex items-center gap-2 mb-4">
-          <Calendar size={16} className="text-amber-500" />
+      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
+        <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold flex items-center gap-2 mb-4">
+          <Calendar size={16} style={{ color: 'var(--brand)' }} />
           Escolha a Data
         </h2>
         <DateSelector
@@ -102,13 +102,13 @@ export default function Step1DateTime({ onNext }: Props) {
         />
       </div>
 
-      <div className="bg-zinc-900 rounded-2xl p-4 md:p-6">
-        <h2 className="text-white font-semibold flex items-center gap-2 mb-1">
-          <Clock size={16} className="text-amber-500" />
+      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
+        <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold flex items-center gap-2 mb-1">
+          <Clock size={16} style={{ color: 'var(--brand)' }} />
           Horarios Disponíveis
         </h2>
         {selectedDay && (
-          <p className="text-zinc-400 text-sm mb-4">
+          <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-4">
             {selectedDay.label.toLowerCase()}, {selectedDay.day} de {selectedDay.month === 'mai' ? 'maio' : 'junho'}
           </p>
         )}
@@ -128,11 +128,11 @@ export default function Step1DateTime({ onNext }: Props) {
       <button
         onClick={handleNext}
         disabled={!selectedTime}
-        className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-          selectedTime
-            ? 'bg-amber-500 hover:bg-amber-400 text-black'
-            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-        }`}
+        style={{
+          backgroundColor: selectedTime ? 'var(--brand)' : 'var(--bg-elevated)',
+          color: selectedTime ? '#000' : 'var(--text-muted)',
+        }}
+        className="w-full py-3 rounded-xl font-semibold transition-colors disabled:cursor-not-allowed"
       >
         Próximo
       </button>

@@ -1,32 +1,41 @@
-import { Bell, Moon, RefreshCw } from 'lucide-react'
+import { Bell, Moon, Sun, RefreshCw } from 'lucide-react'
+import { useTheme } from '../../hooks/useTheme'
 
 interface HeaderProps {
   userName?: string
 }
 
 export default function Header({ userName = 'João' }: HeaderProps) {
-  return (
-    <header className="h-14 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-4 md:px-6">
+  const { isDark, toggleTheme } = useTheme()
 
-      {/* Busca — só no desktop */}
-      <div className="hidden md:flex items-center gap-2 bg-zinc-800 rounded-lg px-3 py-2 w-64">
-        <span className="text-zinc-400 text-sm">Buscar...</span>
+  return (
+    <header
+      style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
+      className="h-14 border-b flex items-center justify-between px-4 md:px-6"
+    >
+      <div
+        style={{ backgroundColor: 'var(--bg-elevated)' }}
+        className="hidden md:flex items-center gap-2 rounded-lg px-3 py-2 w-64"
+      >
+        <span style={{ color: 'var(--text-muted)' }} className="text-sm">Buscar...</span>
       </div>
 
-      {/* Espaço vazio no mobile pra empurrar ações pra direita */}
       <div className="md:hidden" />
 
-      {/* Ações */}
       <div className="flex items-center gap-3">
-        <button className="hidden md:block text-zinc-400 hover:text-white transition-colors">
+        <button style={{ color: 'var(--text-secondary)' }} className="hidden md:block transition-colors hover:opacity-80">
           <RefreshCw size={18} />
         </button>
-        <button className="text-zinc-400 hover:text-white transition-colors relative">
+        <button style={{ color: 'var(--text-secondary)' }} className="transition-colors hover:opacity-80 relative">
           <Bell size={18} />
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
         </button>
-        <button className="text-zinc-400 hover:text-white transition-colors">
-          <Moon size={18} />
+        <button
+          onClick={toggleTheme}
+          style={{ color: 'var(--text-secondary)' }}
+          className="transition-colors hover:opacity-80"
+        >
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
         </button>
         <div className="flex items-center gap-2 cursor-pointer">
           <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
@@ -34,10 +43,9 @@ export default function Header({ userName = 'João' }: HeaderProps) {
               {userName.slice(0, 2).toUpperCase()}
             </span>
           </div>
-          <span className="hidden sm:block text-white text-sm">{userName}</span>
+          <span style={{ color: 'var(--text-primary)' }} className="hidden sm:block text-sm">{userName}</span>
         </div>
       </div>
-
     </header>
   )
 }

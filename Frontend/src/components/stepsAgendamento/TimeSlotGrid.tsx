@@ -22,13 +22,14 @@ export default function TimeSlotGrid({
           key={slot.time}
           disabled={!slot.available}
           onClick={() => onSelect(slot.time)}
-          className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+          style={
             selectedTime === slot.time && selectedProfessionalId === professionalId
-              ? 'bg-amber-500 border-amber-500 text-black font-semibold'
+              ? { backgroundColor: 'var(--brand)', borderColor: 'var(--brand)', color: '#000' }
               : slot.available
-                ? 'border-zinc-700 text-white hover:border-zinc-500'
-                : 'border-zinc-800 text-zinc-600 cursor-not-allowed'
-          }`}
+                ? { borderColor: 'var(--border)', color: 'var(--text-primary)', backgroundColor: 'transparent' }
+                : { borderColor: 'var(--border)', color: 'var(--text-muted)', backgroundColor: 'transparent' }
+          }
+          className="px-3 py-1.5 rounded-lg text-sm border transition-colors disabled:cursor-not-allowed"
         >
           {slot.time}
         </button>

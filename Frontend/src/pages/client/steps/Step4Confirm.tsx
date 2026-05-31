@@ -10,6 +10,14 @@ function formatPrice(cents: number) {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+function formatDate(date: string) {
+  return new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 export default function Step4Confirm({ booking, onBack }: Props) {
   function handleConfirm() {
     console.log('Agendamento confirmado:', booking)
@@ -18,56 +26,51 @@ export default function Step4Confirm({ booking, onBack }: Props) {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
-      <div className="bg-zinc-900 rounded-2xl p-4 md:p-6">
+      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
 
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-white bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-lg mb-4 transition-colors"
+          style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
+          className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg mb-4 transition-colors hover:opacity-80"
         >
           <ChevronLeft size={16} />
           Voltar
         </button>
 
         <div className="flex items-center gap-2 mb-1">
-          <Check size={18} className="text-white" />
-          <h2 className="text-white font-semibold">Confirmar Agendamento</h2>
+          <Check size={18} style={{ color: 'var(--text-primary)' }} />
+          <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold">Confirmar Agendamento</h2>
         </div>
-        <p className="text-zinc-400 text-sm mb-6">Revise os detalhes</p>
+        <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-6">Revise os detalhes</p>
 
         {/* Resumo */}
-        <div className="bg-zinc-800 rounded-xl p-4 flex flex-col gap-3 mb-6">
+        <div style={{ backgroundColor: 'var(--bg-elevated)' }} className="rounded-xl p-4 flex flex-col gap-3 mb-6">
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Profissional</span>
-            <span className="text-white font-medium">{booking.professionalName}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Profissional</span>
+            <span style={{ color: 'var(--text-primary)' }} className="font-medium">{booking.professionalName}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Servico</span>
-            <span className="text-white font-medium">{booking.serviceName}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Servico</span>
+            <span style={{ color: 'var(--text-primary)' }} className="font-medium">{booking.serviceName}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Data</span>
-            <span className="text-white font-medium">
-                {booking.date
-                    ? new Date(booking.date + 'T00:00:00').toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                    })
-                    : '--'}
+            <span style={{ color: 'var(--text-secondary)' }}>Data</span>
+            <span style={{ color: 'var(--text-primary)' }} className="font-medium">
+              {booking.date ? formatDate(booking.date) : '--'}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Horario</span>
-            <span className="text-white font-medium">{booking.time}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Horario</span>
+            <span style={{ color: 'var(--text-primary)' }} className="font-medium">{booking.time}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">Duracao</span>
-            <span className="text-white font-medium">{booking.serviceDuration} min</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Duracao</span>
+            <span style={{ color: 'var(--text-primary)' }} className="font-medium">{booking.serviceDuration} min</span>
           </div>
-          <div className="h-px bg-zinc-700" />
+          <div style={{ backgroundColor: 'var(--border)' }} className="h-px" />
           <div className="flex justify-between">
-            <span className="text-white font-semibold">Total</span>
-            <span className="text-amber-500 font-bold text-lg">
+            <span style={{ color: 'var(--text-primary)' }} className="font-semibold">Total</span>
+            <span style={{ color: 'var(--brand)' }} className="font-bold text-lg">
               {booking.servicePrice ? formatPrice(booking.servicePrice) : '--'}
             </span>
           </div>
@@ -75,7 +78,8 @@ export default function Step4Confirm({ booking, onBack }: Props) {
 
         <button
           onClick={handleConfirm}
-          className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold py-3 rounded-xl transition-colors"
+          style={{ backgroundColor: 'var(--brand)' }}
+          className="w-full flex items-center justify-center gap-2 text-black font-semibold py-3 rounded-xl transition-colors hover:opacity-90"
         >
           <Check size={18} />
           Confirmar Agendamento
