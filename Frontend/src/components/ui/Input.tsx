@@ -5,6 +5,7 @@ interface InputProps {
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   rightElement?: React.ReactNode
+  leftElement?: React.ReactNode
   className?: string
 }
 
@@ -15,6 +16,7 @@ export default function Input({
   value,
   onChange,
   rightElement,
+  leftElement,
   className = '',
 }: InputProps) {
   return (
@@ -23,6 +25,11 @@ export default function Input({
         <label style={{ color: 'var(--text-primary)' }} className="text-sm font-medium">{label}</label>
       )}
       <div className="relative">
+        {leftElement && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2">
+            {leftElement}
+          </div>
+        )}
         <input
           type={type}
           placeholder={placeholder}
@@ -33,7 +40,7 @@ export default function Input({
             color: 'var(--text-primary)',
             borderColor: 'var(--border)',
           }}
-          className={`w-full rounded-lg px-4 py-3 text-sm outline-none border focus:border-amber-500 transition-colors ${className}`}
+          className={`w-full rounded-lg ${leftElement ? 'pl-10' : 'px-4'} py-3 text-sm outline-none border focus:border-amber-500 transition-colors ${className}`}
         />
         {rightElement && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">

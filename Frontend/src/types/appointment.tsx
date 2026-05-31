@@ -11,7 +11,7 @@ export interface ProfessionalSlots {
 }
 
 export interface BookingState {
-  step: 1 | 2 | 3 | 4
+  step: 1 | 2 | 3 | 4 | 5
   date: string | null
   time: string | null
   professionalId: string | null
@@ -26,6 +26,8 @@ export interface Appointment {
   id: string
   professionalName: string
   professionalInitials: string
+  clientName: string
+  clientInitials: string
   serviceName: string
   date: string
   time: string

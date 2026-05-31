@@ -23,12 +23,17 @@ export function useLogin() {
       } else if (form.role === 'professional') {
         navigate('/professional/agenda')
       } else {
-        navigate('/admin/dashboard')
+        navigate('/admin/profissionais')
       }
 
       setLoading(false)
     }, 500)
   }
 
-  return { login, loading, error }
+  function logout() {
+    localStorage.removeItem('user')
+    navigate('/login')
+  }
+
+  return { login, logout, loading, error }
 }

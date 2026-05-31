@@ -4,6 +4,7 @@ import type { BookingState } from '../../../types/appointment'
 interface Props {
   booking: BookingState
   onBack: () => void
+  onNext: () => void
 }
 
 function formatPrice(cents: number) {
@@ -18,10 +19,11 @@ function formatDate(date: string) {
   })
 }
 
-export default function Step4Confirm({ booking, onBack }: Props) {
+export default function Step4Confirm({ booking, onBack, onNext }: Props) {
   function handleConfirm() {
     console.log('Agendamento confirmado:', booking)
     // aqui vai chamar o service quando conectar com o back
+    onNext()
   }
 
   return (
