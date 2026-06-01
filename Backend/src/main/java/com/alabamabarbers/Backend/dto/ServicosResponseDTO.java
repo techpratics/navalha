@@ -8,5 +8,5 @@ public record ServicosResponseDTO(
         String nome,
         BigDecimal preco,
         Integer duracaoMinutos,
-        String status
+        boolean ativo
     ) {}

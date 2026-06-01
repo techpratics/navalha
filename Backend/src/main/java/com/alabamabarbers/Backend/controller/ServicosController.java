@@ -28,10 +28,10 @@ public class ServicosController implements GenericController {
     public ResponseEntity<ServicosResponseDTO> create(@RequestBody @Valid ServicosRequestDTO dto) {
         Servicos servicos = servicosMapper.toEntity(dto);
         Servicos saved = servicosService.create(servicos);
-        ServicosResponseDTO savedProfissional = servicosMapper.toResponse(saved);
+        ServicosResponseDTO savedService = servicosMapper.toResponse(saved);
         URI location = gerarHeaderLocation(saved.getId());
 
-        return ResponseEntity.created(location).body(savedProfissional);
+        return ResponseEntity.created(location).body(savedService);
     }
 
     @GetMapping
