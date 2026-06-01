@@ -4,9 +4,10 @@ import AppointmentCard from './AppointmentCard'
 
 interface AppointmentListProps {
   appointments: Appointment[]
+  view?: 'client' | 'professional'
 }
 
-export default function AppointmentList({ appointments }: AppointmentListProps) {
+export default function AppointmentList({ appointments, view = 'client' }: AppointmentListProps) {
   if (appointments.length === 0) {
     return (
       <div
@@ -22,7 +23,7 @@ export default function AppointmentList({ appointments }: AppointmentListProps) 
   return (
     <div className="flex flex-col gap-3">
       {appointments.map(appointment => (
-        <AppointmentCard key={appointment.id} appointment={appointment} />
+        <AppointmentCard key={appointment.id} appointment={appointment} view={view} />
       ))}
     </div>
   )
