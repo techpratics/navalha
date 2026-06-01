@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -36,5 +37,11 @@ public class Profissional {
 
     @Column(name = "status")
     private boolean ativo = true;
+
+    @OneToMany(mappedBy = "profissional", cascade = CascadeType.ALL)
+    private List<ProfissionalDisponibilidade> disponibilidades;
+
+    @OneToMany(mappedBy = "profissional", cascade = CascadeType.ALL)
+    private List<ProfissionalServicos> servicos;
 
 }

@@ -1,0 +1,32 @@
+package com.alabamabarbers.Backend.repository;
+
+import com.alabamabarbers.Backend.model.Agendamento;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
+
+public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> {
+
+    List<Agendamento> findByProfissionalIdAndDataAndStatusNot(
+            UUID profissionalId, LocalDate data, String status);
+
+    @Query("""
+        SELECT COUNT(a) > 0 FROM Agendamento a
+        WHERE a.profissional.id = :profissionalId
+        AND a.data = :data
+        AND a.status != 'cancelado'
+        AND a.horarioInicio < :fim
+        AND a.horarioFim > :inicio
+    """)
+    boolean existsConflito(
+            @Param("profissionalId") UUID profissionalId,
+            @Param("data") LocalDate data,
+            @Param("inicio") LocalTime inicio,
+            @Param("fim") LocalTime fim
+    );
+}
