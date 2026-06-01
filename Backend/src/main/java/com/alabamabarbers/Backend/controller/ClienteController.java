@@ -36,6 +36,12 @@ public class ClienteController implements GenericController {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toResponse).toList());
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ClienteResponseDTO>> buscar(@RequestParam String q) {
+        List<Cliente> clientes = service.buscar(q);
+        return ResponseEntity.ok(clientes.stream().map(mapper::toResponse).toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ClienteResponseDTO> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toResponse(service.findById(id)));

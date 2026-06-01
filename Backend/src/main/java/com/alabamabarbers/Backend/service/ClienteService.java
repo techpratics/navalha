@@ -30,6 +30,10 @@ public class ClienteService {
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
     }
 
+    public List<Cliente> buscar(String q) {
+        return repository.findByNomeContainingIgnoreCaseOrTelefoneContaining(q, q);
+    }
+
     public Cliente update(UUID id, Cliente cliente) {
         Cliente existing = findById(id);
         existing.setNome(cliente.getNome());
