@@ -1,16 +1,11 @@
 package com.alabamabarbers.Backend.service;
 
-import com.alabamabarbers.Backend.model.Agendamento;
-import com.alabamabarbers.Backend.model.Profissional;
-import com.alabamabarbers.Backend.model.ProfissionalDisponibilidade;
-import com.alabamabarbers.Backend.model.Servicos;
-import com.alabamabarbers.Backend.repository.AgendamentoRepository;
-import com.alabamabarbers.Backend.repository.ProfissionalDisponibilidadeRepository;
-import com.alabamabarbers.Backend.repository.ProfissionalRepository;
-import com.alabamabarbers.Backend.repository.ServicosRepository;
+import com.alabamabarbers.Backend.model.*;
+import com.alabamabarbers.Backend.repository.*;
 import com.alabamabarbers.Backend.validator.ProfissionalValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,14 +25,27 @@ public class ProfissionalService {
     private final ServicosRepository servicosRepository;
     private final ProfissionalDisponibilidadeRepository  disponibilidadeRepository;
     private final AgendamentoRepository  agendamentoRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     public Profissional create(Profissional profissional) {
         profissionalValidator.validate(profissional);
+
+        String encryptedPassword = passwordEncoder.encode(profissional.getUsuario().getSenha());
+        Usuario usuario = new Usuario(profissional.getUsuario().getLogin(), encryptedPassword, Role.PROFISSIONAL);
+        userRepository.save(usuario);
+
+        profissional.setUsuario(usuario);
+
         return profissionalRepository.save(profissional);
     }
 
     public Profissional findById(UUID id) {
         return profissionalRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id.toString()));
+    }
+
+    public Profissional findByUsuarioId(UUID id){
+        return profissionalRepository.findByUsuarioId(id).orElseThrow(() -> new EntityNotFoundException(id.toString()));
     }
 
     public List<Profissional> findAll() {
@@ -77,7 +85,6 @@ public class ProfissionalService {
         Profissional profissionalToUpdate = findById(id);
         profissionalToUpdate.setNome(profissional.getNome());
         profissionalToUpdate.setCpf(profissional.getCpf());
-        profissionalToUpdate.setEmail(profissional.getEmail());
         profissionalToUpdate.setTelefone(profissional.getTelefone());
 
         return profissionalRepository.save(profissionalToUpdate);

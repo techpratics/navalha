@@ -17,8 +17,10 @@ public record ProfissionalRequestDTO(
         @NotNull(message = "campo obrigatório")
         @Past(message = "A data de nascimento deve ser uma data passada")
         LocalDate dataNascimento,
+        @NotBlank
+        String telefone,
         @NotBlank(message = "campo obrigatório")
         @Email(message = "Email inválido")
         String email,
-        String telefone
+        String senha
     ) {}

@@ -1,7 +1,10 @@
 package com.alabamabarbers.Backend.model;
 
+import com.alabamabarbers.Backend.audit.Auditable;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
 import java.util.UUID;
@@ -9,7 +12,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "profissional_disponibilidade", schema = "public")
 @Data
-public class ProfissionalDisponibilidade {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProfissionalDisponibilidade extends Auditable {
 
     @Id
     @Column(name = "id")

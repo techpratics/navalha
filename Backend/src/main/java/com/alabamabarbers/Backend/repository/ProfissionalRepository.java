@@ -9,7 +9,9 @@ import java.util.UUID;
 
 public interface ProfissionalRepository extends JpaRepository<Profissional, UUID> {
 
-    Optional<Profissional> findByEmail(String email);
+    Optional<Profissional> findByCpf(String cpf);
+
+    Optional<Profissional> findByUsuarioId(UUID id);
 
     List<Profissional> findByAtivoTrue();
 

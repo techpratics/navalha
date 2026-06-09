@@ -15,6 +15,10 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> 
     List<Agendamento> findByProfissionalIdAndDataAndStatusNot(
             UUID profissionalId, LocalDate data, String status);
 
+    List<Agendamento> findByClienteId(UUID clienteId);
+
+    List<Agendamento> findByProfissionalId(UUID profissionalId);
+
     @Query("""
         SELECT COUNT(a) > 0 FROM Agendamento a
         WHERE a.profissional.id = :profissionalId

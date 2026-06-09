@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  alabama-db:
+    image: postgres:16-alpine
+    container_name: alabama_postgres
+    environment:
+      POSTGRES_DB: alabama_barbers_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - alabama-network
+
+  alabama-api:
+    build: .
+    container_name: alabama_spring_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://alabama-db:5432/alabama_barbers_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: "6f8a4b3c2e1d0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e"
+    depends_on:
+      - alabama-db
+    networks:
+      - alabama-network
+
+volumes:
+  postgres_data:
+
+networks:
+  alabama-network:

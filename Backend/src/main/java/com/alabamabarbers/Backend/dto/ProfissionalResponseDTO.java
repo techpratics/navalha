@@ -8,7 +8,6 @@ public record ProfissionalResponseDTO(
         String nome,
         String cpf,
         LocalDate dataNascimento,
-        String email,
         String telefone,
         boolean ativo
     ) {}

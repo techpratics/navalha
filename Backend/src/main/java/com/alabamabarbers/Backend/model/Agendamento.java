@@ -1,7 +1,10 @@
 package com.alabamabarbers.Backend.model;
 
+import com.alabamabarbers.Backend.audit.Auditable;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,7 +13,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "agendamentos")
 @Data
-public class Agendamento {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Agendamento extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

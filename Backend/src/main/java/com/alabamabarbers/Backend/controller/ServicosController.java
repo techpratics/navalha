@@ -1,6 +1,5 @@
 package com.alabamabarbers.Backend.controller;
 
-
 import com.alabamabarbers.Backend.controller.common.GenericController;
 import com.alabamabarbers.Backend.dto.ServicosRequestDTO;
 import com.alabamabarbers.Backend.dto.ServicosResponseDTO;
@@ -10,6 +9,7 @@ import com.alabamabarbers.Backend.service.ServicosService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -25,6 +25,7 @@ public class ServicosController implements GenericController {
     private final ServicosMapper servicosMapper;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ServicosResponseDTO> create(@RequestBody @Valid ServicosRequestDTO dto) {
         Servicos servicos = servicosMapper.toEntity(dto);
         Servicos saved = servicosService.create(servicos);
@@ -35,6 +36,7 @@ public class ServicosController implements GenericController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROFISSIONAL', 'CLIENTE')")
     public ResponseEntity<List<ServicosResponseDTO>> findAll(){
         List<Servicos> profissionais = servicosService.findAll();
         List<ServicosResponseDTO> list = profissionais.stream().map(servicosMapper::toResponse).toList();
@@ -43,6 +45,7 @@ public class ServicosController implements GenericController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROFISSIONAL', 'CLIENTE')")
     public ResponseEntity<ServicosResponseDTO> findById(@PathVariable("id") UUID id){
         Servicos profissional = servicosService.findById(id);
         ServicosResponseDTO profissionalFound = servicosMapper.toResponse(profissional);
@@ -51,6 +54,7 @@ public class ServicosController implements GenericController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ServicosResponseDTO> update(
             @PathVariable UUID id,
             @RequestBody @Valid ServicosRequestDTO dto) {
@@ -62,9 +66,9 @@ public class ServicosController implements GenericController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> alternarStatus(@PathVariable UUID id) {
         servicosService.inverterStatus(id);
         return ResponseEntity.noContent().build();
     }
-
 }

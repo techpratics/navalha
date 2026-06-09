@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import java.time.LocalDate;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,11 +39,15 @@ class ClienteControllerTest {
 
     @Test
     void deveCadastrarClienteComSucesso() throws Exception {
+        LocalDate date = LocalDate.of(2005, 07, 11);
+
         ClienteRequestDTO dto = new ClienteRequestDTO(
                 "João Silva",
                 "85999999999",
-                "joao@email.com",
-                "529.982.247-25"
+                date,
+                "529.982.247-25",
+                "teste@gmail.com",
+                "teste"
         );
 
         mockMvc.perform(post("/clientes")
@@ -56,11 +62,14 @@ class ClienteControllerTest {
 
     @Test
     void deveRetornar400QuandoCampoObrigatorioFaltando() throws Exception {
+        LocalDate date = LocalDate.of(2005, 07, 12);
         ClienteRequestDTO dto = new ClienteRequestDTO(
                 "",
                 "85999999999",
-                "joao@email.com",
-                "529.982.247-25"
+                date,
+                "529.982.247-25",
+                "teste2@gmail.com",
+                "teste"
         );
 
         mockMvc.perform(post("/clientes")

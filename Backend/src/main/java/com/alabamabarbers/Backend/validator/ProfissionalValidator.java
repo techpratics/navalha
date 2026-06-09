@@ -21,7 +21,7 @@ public class ProfissionalValidator {
     }
 
     private boolean existsProfissional(Profissional profissional){
-        Optional<Profissional> profissionalFound = repository.findByEmail(profissional.getEmail());
+        Optional<Profissional> profissionalFound = repository.findByCpf(profissional.getCpf());
 
         if(profissional.getId() == null){
             return profissionalFound.isPresent();

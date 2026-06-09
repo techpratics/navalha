@@ -51,7 +51,6 @@ class ProfissionalSlotsTest {
         profissional.setNome("Barbeiro Teste");
         profissional.setCpf("111.444.777-35");
         profissional.setDataNascimento(LocalDate.of(1990, 1, 1));
-        profissional.setEmail("barbeiro@email.com");
         profissional.setTelefone("85999999999");
         profissional.setAtivo(true);
         profissionalId = profissionalRepository.save(profissional).getId();
@@ -66,7 +65,6 @@ class ProfissionalSlotsTest {
         Cliente cliente = new Cliente();
         cliente.setNome("Cliente Teste");
         cliente.setTelefone("85988888888");
-        cliente.setEmail("cliente@email.com");
         cliente.setCpf("529.982.247-25");
         cliente.setStatus(true);
         Cliente savedCliente = clienteRepository.save(cliente);

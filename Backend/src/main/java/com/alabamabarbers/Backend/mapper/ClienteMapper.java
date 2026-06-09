@@ -11,6 +11,8 @@ public interface ClienteMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "usuario.login", source = "email")
+    @Mapping(target = "usuario.senha", source = "senha")
     Cliente toEntity(ClienteRequestDTO dto);
 
     ClienteResponseDTO toResponse(Cliente entity);
