@@ -63,8 +63,6 @@ public class SecurityConfigurations {
                 "http://127.0.0.1:5173"
         ));
 
-        // configuration.setAllowedOrigins(List.of("*"));
-
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);
