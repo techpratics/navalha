@@ -1,5 +1,7 @@
 package com.alabamabarbers.Backend.dto;
 
+import com.alabamabarbers.Backend.model.StatusAgendamento;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -15,5 +17,5 @@ public record AgendamentoResponseDTO(
         LocalDate data,
         LocalTime horarioInicio,
         LocalTime horarioFim,
-        String status
+        StatusAgendamento status
 ) {}

@@ -1,5 +1,6 @@
 package com.alabamabarbers.Backend.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.alabamabarbers.Backend.model.StatusAgendamento;
+import jakarta.validation.constraints.NotNull;
 
-public record AlterarStatusRequestDTO(@NotBlank String status) {}
+public record AlterarStatusRequestDTO(@NotNull(message = "Campo obrigatório") StatusAgendamento status) {}

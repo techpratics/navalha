@@ -7,15 +7,15 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record AgendamentoRequestDTO(
-        @NotNull
+        @NotNull(message = "Campo obrigatório")
         UUID profissionalId,
-        @NotNull
+        @NotNull(message = "Campo obrigatório")
         UUID clienteId,
-        @NotNull
+        @NotNull(message = "Campo obrigatório")
         UUID servicoId,
-        @NotNull
+        @NotNull(message = "Campo obrigatório")
         LocalDate data,
-        @NotNull
+        @NotNull(message = "Campo obrigatório")
         LocalTime horarioInicio
 ) {
 }

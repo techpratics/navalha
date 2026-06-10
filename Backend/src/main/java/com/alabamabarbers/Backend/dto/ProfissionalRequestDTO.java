@@ -22,5 +22,6 @@ public record ProfissionalRequestDTO(
         @NotBlank(message = "campo obrigatório")
         @Email(message = "Email inválido")
         String email,
+        @NotBlank
         String senha
     ) {}

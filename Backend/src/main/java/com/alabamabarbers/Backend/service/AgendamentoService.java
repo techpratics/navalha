@@ -7,8 +7,10 @@ import com.alabamabarbers.Backend.model.*;
 import com.alabamabarbers.Backend.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +27,24 @@ public class AgendamentoService {
     private final AgendamentoMapper mapper;
     private final ClienteService clienteService;
     private final ProfissionalService profissionalService;
+    private final EmpresaRepository empresaRepository;
 
     public Agendamento create(AgendamentoRequestDTO dto) {
+
+        Empresa empresa = empresaRepository.findAll().stream()
+                .findFirst()
+                .orElse(null);
+
+        if (empresa != null) {
+            DayOfWeek diaSemanaEnum = dto.data().getDayOfWeek();
+            HorarioFuncionamento configDia = empresa.getHorarios().get(diaSemanaEnum);
+
+            if (configDia == null || configDia.isFechado() ||
+                    dto.horarioInicio().isBefore(configDia.getHoraAbertura()) ||
+                    dto.horarioInicio().isAfter(configDia.getHoraFechamento())) {
+                throw new RuntimeException("A barbearia está fechada neste dia ou horário!");
+            }
+        }
 
         Profissional profissional = profissionalRepository.findById(dto.profissionalId())
                 .orElseThrow(() -> new RuntimeException("Profissional não encontrado"));
@@ -58,7 +76,7 @@ public class AgendamentoService {
         agendamento.setCliente(cliente);
         agendamento.setServicos(servico);
         agendamento.setHorarioFim(horarioFim);
-        agendamento.setStatus("confirmado");
+        agendamento.setStatus(StatusAgendamento.CONFIRMADO);
 
         return agendamentoRepository.save(agendamento);
     }
@@ -113,23 +131,23 @@ public class AgendamentoService {
             return agendamentoRepository.findByProfissionalId(profissional.getId());
         }
 
-        throw new org.springframework.security.access.AccessDeniedException("Usuário não tem permissão para ver essa agenda");
+        throw new AccessDeniedException("Usuário não tem permissão para ver essa agenda");
     }
 
-    public void alterarStatus(UUID id, String novoStatus) {
+    public void alterarStatus(UUID id, StatusAgendamento novoStatus) {
         Agendamento agendamento = findById(id);
         agendamento.setStatus(novoStatus);
         agendamentoRepository.save(agendamento);
     }
 
     @Transactional
-    public void alterarStatusSeguro(UUID id, String novoStatus, Usuario usuarioLogado) {
+    public void alterarStatusSeguro(UUID id, StatusAgendamento novoStatus, Usuario usuarioLogado) {
         Agendamento agendamento = findById(id);
 
         if (usuarioLogado.getRole() == Role.CLIENTE) {
             Cliente cliente = clienteService.findByUsuarioId(usuarioLogado.getId());
             if (!agendamento.getCliente().getId().equals(cliente.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "Você não tem permissão para alterar este agendamento."
                 );
             }
@@ -138,7 +156,7 @@ public class AgendamentoService {
         if (usuarioLogado.getRole() == Role.PROFISSIONAL) {
             Profissional profissional = profissionalService.findByUsuarioId(usuarioLogado.getId());
             if (!agendamento.getProfissional().getId().equals(profissional.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "Este agendamento pertence a outro profissional."
                 );
             }

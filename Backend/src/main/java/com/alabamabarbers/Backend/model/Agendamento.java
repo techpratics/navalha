@@ -42,6 +42,7 @@ public class Agendamento extends Auditable {
     @Column(name = "horario_fim", nullable = false)
     private LocalTime horarioFim;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private StatusAgendamento status;
 }

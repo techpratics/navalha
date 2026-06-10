@@ -1,11 +1,4 @@
-debug: true
-
 spring:
-  logging:
-    level:
-      root: INFO
-      org.flywaydb: DEBUG
-      org.springframework.boot.autoconfigure.logging: DEBUG
   application:
     name: Backend
   datasource:

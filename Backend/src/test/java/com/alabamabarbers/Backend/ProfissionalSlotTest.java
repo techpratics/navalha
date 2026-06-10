@@ -83,7 +83,7 @@ class ProfissionalSlotsTest {
         agendamento.setData(LocalDate.of(2026, 6, 10));
         agendamento.setHorarioInicio(LocalTime.of(8, 0));
         agendamento.setHorarioFim(LocalTime.of(8, 30));
-        agendamento.setStatus("confirmado");
+        agendamento.setStatus(StatusAgendamento.CONFIRMADO);
         agendamentoRepository.save(agendamento);
     }
 

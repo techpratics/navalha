@@ -31,7 +31,16 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profissionais/{id}/slots").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/empresa").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/empresa").hasRole("ADMIN")
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(401);
+                            response.getWriter().write("{\"erro\": \"Não autorizado. Token ausente, inválido ou expirado.\"}");
+                        })
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
