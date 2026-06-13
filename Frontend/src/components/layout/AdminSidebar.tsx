@@ -9,6 +9,7 @@ export default function AdminSidebar() {
 
   const menuItems = [
     { path: '/admin/agenda', label: 'Agenda Geral', icon: Calendar },
+    { path: '/admin/agenda-profissionais', label: 'Visão por Equipe', icon: Users },
     { path: '/admin/cadastro-cliente', label: 'Cadastrar Cliente', icon: UserPlus },
     { path: '/admin/clientes', label: 'Clientes', icon: Users },
     { path: '/admin/cadastro-profissional', label: 'Cadastrar Profissional', icon: Briefcase },

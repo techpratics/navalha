@@ -1,74 +1,68 @@
-import { useState } from 'react'
-import type { Appointment } from '../types/appointment'
+import { useState, useEffect } from 'react';
+import type { Appointment } from '../types/appointment';
+import { scheduleService } from '../services/schedule.service';
 
-type ViewMode = 'daily' | 'weekly' | 'monthly'
+type ViewMode = 'daily' | 'weekly' | 'monthly';
 
 export function useSchedule() {
-  const [viewMode, setViewMode] = useState<ViewMode>('daily')
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const [viewMode, setViewMode] = useState<ViewMode>('daily');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock de dados (futuramente aqui vai ter um useEffect chamando a API com a currentDate)
-  const appointments: Appointment[] = [
-    {
-      id: '1',
-      time: '09:00',
-      durationMinutes: 45,
-      clientName: 'Carlos Silva',
-      clientInitials: 'CS',
-      professionalName: 'João Barbeiro',
-      professionalInitials: 'JB',
-      serviceName: 'Corte Degradê',
-      status: 'confirmed',
-      date: '2026-06-13',
-      priceInCents: 4500
-    },
-    {
-      id: '2',
-      time: '10:30',
-      durationMinutes: 60,
-      clientName: 'Marcos Paulo',
-      clientInitials: 'MP',
-      professionalName: 'João Barbeiro',
-      professionalInitials: 'JB',
-      serviceName: 'Barba Terapia Completa',
-      status: 'pending',
-      date: '2026-06-13',
-      priceInCents: 3500
+  useEffect(() => {
+    async function loadSchedule() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await scheduleService.getAgendamentos();
+        setAppointments(data);
+      } catch (err: any) {
+        console.error("ERRO NA REQUISIÇÃO:", err);
+        setError('Não foi possível carregar a agenda. Verifique sua conexão.');
+      } finally {
+        setLoading(false);
+      }
     }
-  ]
 
-  // Lógica inteligente de navegação baseada no ViewMode
+    loadSchedule();
+  }, [currentDate, viewMode]);
+
   const handlePrevious = () => {
     setCurrentDate((prev) => {
-      const newDate = new Date(prev)
-      if (viewMode === 'daily') newDate.setDate(prev.getDate() - 1)
-      if (viewMode === 'weekly') newDate.setDate(prev.getDate() - 7)
-      if (viewMode === 'monthly') newDate.setMonth(prev.getMonth() - 1)
-      return newDate
-    })
-  }
+      const newDate = new Date(prev);
+      if (viewMode === 'daily') newDate.setDate(prev.getDate() - 1);
+      if (viewMode === 'weekly') newDate.setDate(prev.getDate() - 7);
+      if (viewMode === 'monthly') newDate.setMonth(prev.getMonth() - 1);
+      return newDate;
+    });
+  };
 
   const handleNext = () => {
     setCurrentDate((prev) => {
-      const newDate = new Date(prev)
-      if (viewMode === 'daily') newDate.setDate(prev.getDate() + 1)
-      if (viewMode === 'weekly') newDate.setDate(prev.getDate() + 7)
-      if (viewMode === 'monthly') newDate.setMonth(prev.getMonth() + 1)
-      return newDate
-    })
-  }
+      const newDate = new Date(prev);
+      if (viewMode === 'daily') newDate.setDate(prev.getDate() + 1);
+      if (viewMode === 'weekly') newDate.setDate(prev.getDate() + 7);
+      if (viewMode === 'monthly') newDate.setMonth(prev.getMonth() + 1);
+      return newDate;
+    });
+  };
 
   const handleToday = () => {
-    setCurrentDate(new Date())
-  }
+    setCurrentDate(new Date());
+  };
 
   return {
     viewMode,
     setViewMode,
     currentDate,
     appointments,
+    loading,
+    error,
     handlePrevious,
     handleNext,
     handleToday
-  }
+  };
 }

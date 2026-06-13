@@ -25,6 +25,7 @@ export interface BookingState {
 export interface Appointment {
   id: string
   professionalName: string
+  professionalId: string;
   professionalInitials: string
   clientName: string
   clientInitials: string

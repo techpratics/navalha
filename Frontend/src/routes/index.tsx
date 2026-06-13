@@ -9,6 +9,7 @@ import AdminClientsPage from '../pages/admin/AdminClientsPage'
 import ProfessionalRegistrationPage from '../pages/admin/ProfessionalRegistrationPage'
 import AdminProfessionalsPage from '../pages/admin/AdminProfessionalsPage'
 import AdminSchedulePage from '../pages/admin/AdminSchedulePage'  
+import AdminProfessionalsSchedulePage from '../pages/admin/AdminProfessionalsSchedulePage'
 
 const PrivateRoute = ({ allowedRole }: { allowedRole: string }) => {
   const token = localStorage.getItem('@Navalha:token');
@@ -72,6 +73,7 @@ export default function AppRoutes() {
           <Route path="/admin/cadastro-profissional" element={<ProfessionalRegistrationPage />} />
           <Route path="/admin/profissionais" element={<AdminProfessionalsPage />} />
           <Route path="/admin/agenda" element={<AdminSchedulePage />} />
+          <Route path="/admin/agenda-profissionais" element={<AdminProfessionalsSchedulePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
