@@ -13,6 +13,7 @@ public interface ProfissionalMapper {
     @Mapping(target = "usuario.senha", source = "senha")
     Profissional toEntity(ProfissionalRequestDTO dto);
 
+    @Mapping(target = "email", source = "usuario.login")
     ProfissionalResponseDTO toResponse(Profissional profissional);
 
 }
