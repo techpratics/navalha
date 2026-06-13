@@ -1,6 +1,6 @@
 import AdminLayout from '../../components/layout/AdminLayout'
 import AppointmentCard from '../../components/appointments/AppointmentCard'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, LayoutGrid, Columns, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, LayoutGrid, Columns, Clock, CalendarPlus } from 'lucide-react'
 import { useSchedule } from '../../hooks/useSchedule'
 import AppointmentModal from '../../components/appointments/AppointmentModal'
 import AppointmentFormModal from '../../components/appointments/AppointmentFormModal';
@@ -70,13 +70,25 @@ export default function AdminSchedulePage() {
       <div className="max-w-6xl mx-auto flex flex-col h-full gap-6 pb-10">
         
         {/* Cabeçalho */}
-        <div>
-          <h1 style={{ color: 'var(--text-primary)' }} className="text-2xl font-bold mb-1">Agenda Geral</h1>
-          <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
-            Gerencie os agendamentos e horários da barbearia
-          </p>
+        <div className="flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4">
+          <div>
+            <h1 style={{ color: 'var(--text-primary)' }} className="text-2xl font-bold mb-1">Agenda Geral</h1>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
+              Gerencie os agendamentos e horários da barbearia
+            </p>
+          </div>
+          
+          <button 
+            onClick={() => {
+              setRescheduleData(null); 
+              setIsFormOpen(true);   
+            }}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--brand)] text-black font-bold rounded-xl hover:opacity-90 transition-opacity shadow-sm w-full sm:w-auto"
+          >
+            <CalendarPlus size={20} />
+            <span>Novo Agendamento</span>
+          </button>
         </div>
-
         {/* Barra de Controles */}
         <div 
           style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
