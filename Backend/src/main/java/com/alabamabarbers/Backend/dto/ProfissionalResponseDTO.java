@@ -9,5 +9,6 @@ public record ProfissionalResponseDTO(
         String cpf,
         LocalDate dataNascimento,
         String telefone,
-        boolean ativo
+        boolean ativo,
+        String email
     ) {}
