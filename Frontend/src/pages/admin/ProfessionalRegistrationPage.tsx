@@ -2,7 +2,7 @@ import { useState } from 'react'
 import AdminLayout from '../../components/layout/AdminLayout'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
-import { UserCheck, CheckCircle2, Briefcase } from 'lucide-react'
+import { UserCheck, CheckCircle2, Calendar } from 'lucide-react'
 import { useProfessionals } from '../../hooks/useProfessionals'
 
 export default function ProfessionalRegistrationPage() {
@@ -11,7 +11,8 @@ export default function ProfessionalRegistrationPage() {
     name: '',
     email: '',
     phone: '',
-    specialty: '',
+    cpf: '',
+    dataNascimento: '2000-01-01',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -22,24 +23,28 @@ export default function ProfessionalRegistrationPage() {
     if (!form.name) newErrors.name = 'Nome é obrigatório'
     if (!form.email) newErrors.email = 'Email é obrigatório'
     if (!form.phone) newErrors.phone = 'Telefone é obrigatório'
-    if (!form.specialty) newErrors.specialty = 'Especialidade é obrigatória'
+    if (!form.cpf) newErrors.cpf = 'CPF é obrigatório'
+    if (!form.dataNascimento) newErrors.dataNascimento = 'Data de nascimento é obrigatória'
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
 
     setLoading(true)
-    setTimeout(() => {
-      addProfessional(form)
-      setLoading(false)
+    try {
+      await addProfessional(form)
       setSuccess(true)
-      setForm({ name: '', email: '', phone: '', specialty: '' })
-      setTimeout(() => setSuccess(false), 3000)
-    }, 1000)
+      setForm({ name: '', email: '', phone: '', cpf: '', dataNascimento: '2000-01-01' })
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao realizar o cadastro.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -90,21 +95,30 @@ export default function ProfessionalRegistrationPage() {
                 />
                 <Input
                   label="Telefone"
-                  placeholder="(00) 00000-0000"
+                  placeholder="(88) 99999-9999"
                   value={form.phone}
                   onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                   error={errors.phone}
                 />
               </div>
 
-              <Input
-                label="Especialidade"
-                placeholder="Ex: Cabelo, Barba, Visagismo"
-                value={form.specialty}
-                onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))}
-                error={errors.specialty}
-                leftElement={<Briefcase size={16} style={{ color: 'var(--text-muted)' }} />}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Input
+                  label="CPF"
+                  placeholder="000.000.000-00"
+                  value={form.cpf}
+                  onChange={e => setForm(f => ({ ...f, cpf: e.target.value }))}
+                  error={errors.cpf}
+                />
+                <Input
+                  label="Data de Nascimento"
+                  type="date"
+                  value={form.dataNascimento}
+                  onChange={e => setForm(f => ({ ...f, dataNascimento: e.target.value }))}
+                  error={errors.dataNascimento}
+                  leftElement={<Calendar size={16} style={{ color: 'var(--text-muted)' }} />}
+                />
+              </div>
 
               <div className="pt-4">
                 <Button type="submit" variant="primary" className="w-full" disabled={loading}>

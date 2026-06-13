@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Scissors, UserPlus, Users, PanelLeftClose, PanelLeftOpen, Briefcase } from 'lucide-react'
+import { Scissors, UserPlus, Users, PanelLeftClose, PanelLeftOpen, Briefcase, Calendar } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function AdminSidebar() {
@@ -8,12 +8,13 @@ export default function AdminSidebar() {
   const location = useLocation()
 
   const menuItems = [
+    { path: '/admin/agenda', label: 'Agenda Geral', icon: Calendar },
+    { path: '/admin/agenda-profissionais', label: 'Visão por Equipe', icon: Users },
     { path: '/admin/cadastro-cliente', label: 'Cadastrar Cliente', icon: UserPlus },
     { path: '/admin/clientes', label: 'Clientes', icon: Users },
     { path: '/admin/cadastro-profissional', label: 'Cadastrar Profissional', icon: Briefcase },
     { path: '/admin/profissionais', label: 'Profissionais', icon: Scissors },
   ]
-
 
   return (
     <aside
