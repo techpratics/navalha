@@ -52,4 +52,20 @@ export const professionalService = {
   }): Promise<void> {
     await api.post('/agendamentos/admin', payload);
   },
+
+  async getProfessionalServices(id: string): Promise<any[]> {
+    const response = await api.get(`/profissionais/${id}/servicos`);
+    return response.data || [];
+  },
+
+  // Vincula um novo serviço
+  async linkService(id: string, servicoId: string): Promise<any> {
+    const response = await api.post(`/profissionais/${id}/servicos`, { servicoId });
+    return response.data; 
+    },
+
+  // Remove o vínculo de um serviço
+  async unlinkService(id: string, servicoId: string): Promise<void> {
+    await api.delete(`/profissionais/${id}/servicos/${servicoId}`);
+  }
 };

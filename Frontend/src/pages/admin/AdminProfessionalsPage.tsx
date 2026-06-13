@@ -1,16 +1,18 @@
 import { useState, useMemo } from 'react'
-import { Search, Scissors, Phone, Mail, UserX, UserCheck, Filter, AlertTriangle } from 'lucide-react'
+import { Search, Scissors, Phone, Mail, UserX, UserCheck, Filter, AlertTriangle, Settings } from 'lucide-react'
 import AdminLayout from '../../components/layout/AdminLayout'
 import { useProfessionals } from '../../hooks/useProfessionals'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
 import type { Professional } from '../../types/professional'
+import ProfessionalServicesModal from '../../components/professionals/ProfessionalServicesModal'
 
 export default function AdminProfessionalsPage() {
   const { professionals, toggleProfessionalStatus } = useProfessionals()
   const [search, setSearch] = useState('')
   const [showDeactivated, setShowDeactivated] = useState(false)
   const [confirmingStatus, setConfirmingStatus] = useState<Professional | null>(null)
+  const [servicesModalProf, setServicesModalProf] = useState<Professional | null>(null)
 
   const filteredProfessionals = useMemo(() => {
     return professionals.filter(prof => {
@@ -98,11 +100,21 @@ export default function AdminProfessionalsPage() {
                 </div>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex gap-2">
+                <Button 
+                  onClick={() => setServicesModalProf(prof)}
+                  variant="secondary"
+                  className="flex-1"
+                  disabled={!prof.isActive}
+                >
+                  <Settings size={18} className="mr-2" />
+                  Serviços
+                </Button>
+
                 <Button 
                   onClick={() => prof.isActive ? setConfirmingStatus(prof) : toggleProfessionalStatus(prof.id)}
                   variant={prof.isActive ? 'secondary' : 'primary'} 
-                  className={`w-full ${prof.isActive ? 'hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50' : ''}`}
+                  className={`flex-1 ${prof.isActive ? 'hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50' : ''}`}
                 >
                   {prof.isActive ? (
                     <>
@@ -163,6 +175,12 @@ export default function AdminProfessionalsPage() {
           </div>
         </div>
       )}
+      {/*Modal de Vínculo de Serviços */}
+      <ProfessionalServicesModal 
+        professional={servicesModalProf}
+        isOpen={!!servicesModalProf}
+        onClose={() => setServicesModalProf(null)}
+      />
     </AdminLayout>
   )
 }
