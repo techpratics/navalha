@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { LoginFormData, CustomJWTPayload, UsuarioLogado } from '../types/auth'
-import { authService } from '../services/auth-service'
+import { authService } from '../services/auth.service'
 
 export function useLogin() {
   const navigate = useNavigate()
