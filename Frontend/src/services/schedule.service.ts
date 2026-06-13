@@ -43,5 +43,23 @@ export const scheduleService = {
       status: statusMap[item.status] || 'pending',
       priceInCents: 0 
     }));
-  }
+  },
+
+  async updateAppointmentStatus(id: string, newStatus: 'CONFIRMADO' | 'CANCELADO'): Promise<void> {
+    await api.patch(`/agendamentos/${id}/status`, {
+      status: newStatus
+    });
+  },
+  
+  async createAppointment(payload: {
+    profissionalId: string;
+    clienteId: string;
+    servicoId: string;
+    data: string;
+    horarioInicio: string;
+  }): Promise<void> {
+    // Usando a rota de admin que você testou no Swagger
+    await api.post('/agendamentos/admin', payload);
+  },
+  
 };

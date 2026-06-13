@@ -41,5 +41,15 @@ export const professionalService = {
     await api.patch(`/profissionais/${id}/status`, {
       ativo: !currentStatus
     });
-  }
+  },
+
+  async createAppointment(payload: {
+    profissionalId: string;
+    clienteId: string;
+    servicoId: string;
+    data: string;
+    horarioInicio: string;
+  }): Promise<void> {
+    await api.post('/agendamentos/admin', payload);
+  },
 };
