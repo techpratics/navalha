@@ -8,33 +8,27 @@ import ClientRegistrationPage from '../pages/admin/ClientRegistrationPage'
 import AdminClientsPage from '../pages/admin/AdminClientsPage'
 import ProfessionalRegistrationPage from '../pages/admin/ProfessionalRegistrationPage'
 import AdminProfessionalsPage from '../pages/admin/AdminProfessionalsPage'
+import AdminSchedulePage from '../pages/admin/AdminSchedulePage'  
 
-// 1. Guardião das Rotas Privadas
-// Verifica se tem token e se o usuário tem a permissão correta para a rota
 const PrivateRoute = ({ allowedRole }: { allowedRole: string }) => {
   const token = localStorage.getItem('@Navalha:token');
   const userStr = localStorage.getItem('@Navalha:user');
 
-  // Se não tem token, chuta pro login
   if (!token || !userStr) {
     return <Navigate to="/login" replace />;
   }
 
   const user = JSON.parse(userStr);
 
-  // Se tem token, mas a role é diferente da permitida para aquela rota, redireciona para a home dele
   if (user.role !== allowedRole) {
     if (user.role === 'CLIENTE') return <Navigate to="/client/agendar" replace />;
     if (user.role === 'PROFISSIONAL') return <Navigate to="/professional/agenda" replace />;
     if (user.role === 'ADMIN') return <Navigate to="/admin/profissionais" replace />;
   }
 
-  // Se está tudo certo, renderiza a tela que ele pediu
   return <Outlet />;
 };
 
-// 2. Guardião da Rota Pública (Tela de Login)
-// Se o cara já tá logado e tenta ir pro /login, joga ele direto pro sistema (Restaura a sessão)
 const PublicRoute = () => {
   const token = localStorage.getItem('@Navalha:token');
   const userStr = localStorage.getItem('@Navalha:user');
@@ -77,6 +71,7 @@ export default function AppRoutes() {
           <Route path="/admin/clientes" element={<AdminClientsPage />} />
           <Route path="/admin/cadastro-profissional" element={<ProfessionalRegistrationPage />} />
           <Route path="/admin/profissionais" element={<AdminProfessionalsPage />} />
+          <Route path="/admin/agenda" element={<AdminSchedulePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
