@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
+import com.alabamabarbers.Backend.model.StatusAgendamento;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -70,8 +71,13 @@ public class ProfissionalService {
             slot = slot.plusMinutes(duracao);
         }
 
-        List<Agendamento> agendamentos = agendamentoRepository
-                .findByProfissionalIdAndDataAndStatusNot(id, data, "cancelado");
+List<StatusAgendamento> status = List.of(
+    StatusAgendamento.CANCELADO, 
+    StatusAgendamento.NAO_COMPARECEU
+);
+
+List<Agendamento> agendamentos = agendamentoRepository
+        .findByProfissionalIdAndDataAndStatusNotIn(id, data, status);
 
         return slots.stream()
                 .filter(s -> agendamentos.stream().noneMatch(a ->
