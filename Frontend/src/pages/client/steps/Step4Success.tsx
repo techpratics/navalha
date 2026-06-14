@@ -2,7 +2,7 @@ import { CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../../../components/ui/Button'
 
-export default function Step5Success() {
+export default function Step4Success() {
   const navigate = useNavigate()
 
   return (

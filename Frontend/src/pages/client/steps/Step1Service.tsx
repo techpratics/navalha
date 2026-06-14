@@ -1,10 +1,9 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import type { BookingState } from '../../../types/appointment'
 
 interface Props {
   booking: BookingState
   onNext: (data: Partial<BookingState>) => void
-  onBack: () => void
 }
 
 const mockServices = [
@@ -18,7 +17,7 @@ function formatPrice(cents: number) {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-export default function Step3Service({ booking, onNext, onBack }: Props) {
+export default function Step1Service({ onNext }: Props) {
   function handleSelect(id: string, name: string, duration: number, price: number) {
     onNext({ serviceId: id, serviceName: name, serviceDuration: duration, servicePrice: price })
   }
@@ -27,20 +26,11 @@ export default function Step3Service({ booking, onNext, onBack }: Props) {
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
       <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
 
-        <button
-          onClick={onBack}
-          style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
-          className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg mb-4 transition-colors hover:opacity-80"
-        >
-          <ChevronLeft size={16} />
-          Voltar
-        </button>
-
         <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold mb-1">
           Escolha o Servico
         </h2>
         <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-6">
-          {booking.professionalName} · {booking.date} às {booking.time}
+          O que vamos fazer no seu atendimento?
         </p>
 
         <div className="flex flex-col gap-2">

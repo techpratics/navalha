@@ -58,8 +58,23 @@ export const scheduleService = {
     data: string;
     horarioInicio: string;
   }): Promise<void> {
-    // Usando a rota de admin que você testou no Swagger
     await api.post('/agendamentos/admin', payload);
   },
-  
+
+  async createClientAppointment(data: {
+    profissionalId: string;
+    clienteId: string;
+    servicoId: string;
+    data: string;
+    horarioInicio: string;
+  }): Promise<any> {
+    const response = await api.post('/agendamentos/meu-agendamento', data);
+    return response.data;
+  },
+
+  async getClientAppointments(clienteId: string): Promise<any[]> {
+    const response = await api.get(`/agendamentos/${clienteId}`);
+    return response.data || [];
+  }
+
 };
