@@ -56,6 +56,20 @@ export default function ProfessionalSidebar() {
         </button>
 
         <button
+          onClick={() => navigate('/professional/disponibilidade')}
+          style={{
+            backgroundColor: location.pathname === '/professional/disponibilidade' ? 'rgba(245,158,11,0.1)' : 'transparent',
+            color: location.pathname === '/professional/disponibilidade' ? 'var(--brand)' : 'var(--text-secondary)',
+          }}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors hover:opacity-80"
+        >
+          <Calendar size={16} />
+          <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
+            <span className="text-sm font-medium">Disponibilidade</span>
+          </div>
+        </button>
+
+        <button
           onClick={() => navigate('/professional/clientes')}
           style={{
             backgroundColor: location.pathname === '/professional/clientes' ? 'rgba(245,158,11,0.1)' : 'transparent',

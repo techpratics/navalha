@@ -75,5 +75,29 @@ export const professionalService = {
       params: { data, servicoId }
     });
     return response.data;
+  },
+
+  // Busca a disponibilidade
+  async getAvailability(): Promise<any[]> {
+    const response = await api.get('/profissionais/minha-disponibilidade');
+    return response.data || [];
+  },
+
+  // POST: Cria um dia novo
+  async saveAvailabilityDay(data: { diaSemana: number, horaInicio: string, horaFim: string }): Promise<any> {
+    const response = await api.post('/profissionais/minha-disponibilidade', data);
+    return response.data;
+  },
+
+  // PUT: Atualiza um dia que já existe (NOVO)
+  async updateAvailabilityDay(dispId: string, data: { diaSemana: number, horaInicio: string, horaFim: string }): Promise<any> {
+    const response = await api.put(`/profissionais/disponibilidade/${dispId}`, data);
+    return response.data;
+  },
+
+  // DELETE: Remove um dia inativo (NOVO)
+  async deleteAvailabilityDay(dispId: string): Promise<any> {
+    const response = await api.delete(`/profissionais/disponibilidade/${dispId}`);
+    return response.data;
   }
 };

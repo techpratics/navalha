@@ -7,6 +7,7 @@ interface InputProps {
   rightElement?: React.ReactNode
   leftElement?: React.ReactNode
   className?: string
+  disabled?: boolean
   required?: boolean;
   error?: string
 }
