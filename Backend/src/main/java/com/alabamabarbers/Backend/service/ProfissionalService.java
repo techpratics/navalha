@@ -70,8 +70,13 @@ public class ProfissionalService {
             slot = slot.plusMinutes(duracao);
         }
 
+        List<StatusAgendamento> status = List.of(
+                StatusAgendamento.CANCELADO,
+                StatusAgendamento.NAO_COMPARECEU
+        );
+
         List<Agendamento> agendamentos = agendamentoRepository
-                .findByProfissionalIdAndDataAndStatusNot(id, data, "cancelado");
+                .findByProfissionalIdAndDataAndStatusNotIn(id, data, status);
 
         return slots.stream()
                 .filter(s -> agendamentos.stream().noneMatch(a ->
