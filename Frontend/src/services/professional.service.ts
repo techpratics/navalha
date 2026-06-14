@@ -67,5 +67,13 @@ export const professionalService = {
   // Remove o vínculo de um serviço
   async unlinkService(id: string, servicoId: string): Promise<void> {
     await api.delete(`/profissionais/${id}/servicos/${servicoId}`);
+  },
+
+  // GET SLOTS DO PROFISSIONAL PARA UMA DATA E SERVIÇO
+  async getProfessionalSlots(profissionalId: string, data: string, servicoId: string): Promise<string[]> {
+    const response = await api.get(`/profissionais/${profissionalId}/slots`, {
+      params: { data, servicoId }
+    });
+    return response.data;
   }
 };

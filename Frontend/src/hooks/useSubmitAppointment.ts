@@ -2,10 +2,18 @@ import { useState } from 'react';
 import { scheduleService } from '../services/schedule.service';
 import type { BookingState } from '../types/appointment';
 
-// Função utilitária isolada (não polui a UI)
-function getClientIdFromToken(): string | null {
+// Função atualizada: Lê o ID direto do usuário logado no storage
+function getClientId(): string | null {
   try {
-    const token = localStorage.getItem('token'); 
+    // 1. Tenta pegar direto do objeto de usuário (Mais fácil e limpo)
+    const userStr = localStorage.getItem('@Navalha:user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user.id) return user.id;
+    }
+
+    // 2. Fallback: Se não achar o user, tenta ler o token com o nome correto
+    const token = localStorage.getItem('@Navalha:token'); 
     if (!token) return null;
 
     const base64Url = token.split('.')[1];
@@ -17,7 +25,7 @@ function getClientIdFromToken(): string | null {
     const decoded = JSON.parse(jsonPayload);
     return decoded.id || decoded.sub || null; 
   } catch (error) {
-    console.error("Erro ao decodificar o token:", error);
+    console.error("Erro ao resgatar o ID do cliente:", error);
     return null;
   }
 }
@@ -37,7 +45,8 @@ export function useSubmitAppointment({ booking, onSuccess }: UseSubmitAppointmen
       return;
     }
 
-    const clienteId = getClientIdFromToken();
+    // Chama a nossa nova função
+    const clienteId = getClientId();
 
     if (!clienteId) {
       setErrorMsg("Erro de autenticação. Por favor, faça login novamente.");
@@ -53,7 +62,7 @@ export function useSubmitAppointment({ booking, onSuccess }: UseSubmitAppointmen
         servicoId: booking.serviceId,
         data: booking.date,
         horarioInicio: booking.time.length === 5 ? `${booking.time}:00` : booking.time,
-        clienteId: clienteId
+        clienteId: clienteId 
       });
 
       onSuccess();

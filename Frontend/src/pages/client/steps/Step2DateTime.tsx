@@ -1,62 +1,102 @@
 import { useState, useEffect } from 'react'
-import { Calendar, ChevronLeft, Clock } from 'lucide-react'
+import { Calendar, Clock, ChevronLeft } from 'lucide-react'
 import type { BookingState, ProfessionalSlots } from '../../../types/appointment'
 import DateSelector from '../../../components/stepsAgendamento/DateSelector'
 import ProfessionalSlotsComponent from '../../../components/stepsAgendamento/ProfessionalSlots'
 import { professionalService } from '../../../services/professional.service'
-
 interface Props {
   booking: BookingState
-  onNext: (data: Partial<BookingState>) => void,
+  onNext: (data: Partial<BookingState>) => void
   onBack: () => void
 }
 
-const mockDays = [
-  { date: '2026-05-29', label: 'SEXTA', day: '29', month: 'mai' },
-  { date: '2026-05-30', label: 'SÁBADO', day: '30', month: 'mai' },
-  { date: '2026-05-31', label: 'DOMINGO', day: '31', month: 'mai', disabled: true },
-  { date: '2026-06-01', label: 'SEGUNDA', day: '01', month: 'jun' },
-  { date: '2026-06-02', label: 'TERÇA', day: '02', month: 'jun' },
-]
+function generateNextDays(daysCount: number = 7) {
+  const days = [];
+  const today = new Date();
 
-export default function Step2DateTime({ onNext, onBack }: Props) {
-  const [selectedDate, setSelectedDate] = useState<string>('2026-05-30')
+  const weekDays = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'];
+  const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+  for (let i = 0; i < daysCount; i++) {
+    const currentDate = new Date(today);
+    currentDate.setDate(today.getDate() + i);
+
+    const dateString = currentDate.toISOString().split('T')[0];
+
+    days.push({
+      date: dateString,
+      label: weekDays[currentDate.getDay()],
+      day: String(currentDate.getDate()).padStart(2, '0'),
+      month: months[currentDate.getMonth()]
+    });
+  }
+
+  return days;
+}
+
+export default function Step2DateTime({ booking, onNext, onBack }: Props) {
+
+  const dynamicDays = generateNextDays(10);
+  const [selectedDate, setSelectedDate] = useState<string>(dynamicDays[0].date) 
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null)
   
   const [availableSlots, setAvailableSlots] = useState<ProfessionalSlots[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Busca os profissionais reais quando o componente monta
+  // Dispara a busca toda vez que a DATA mudar
   useEffect(() => {
-    async function loadProfessionals() {
-      setLoading(true)
+    async function loadSlots() {
+      // Se por algum motivo bizarro o cliente chegou aqui sem serviço, aborta
+      if (!booking.serviceId || !selectedDate) return;
+
+      setLoading(true);
+      setSelectedTime(null);
+      setSelectedProfessionalId(null);
+      
       try {
-        const profs = await professionalService.getProfessionals()
+        // 1. Busca todos os profissionais da barbearia
+        const profs = await professionalService.getProfessionals();
         
-        // POR ENQUANTO MOCKADO ENQUANTO O BACKEND CORRIGE O ERRO
-        const slotsComProfissionaisReais: ProfessionalSlots[] = profs.map((p: any) => ({
-          id: p.id,
-          name: p.nome || p.name,
-          initials: (p.nome || p.name).substring(0, 2).toUpperCase(),
-          slots: [
-            { time: '09:00', available: true },
-            { time: '10:00', available: true },
-            { time: '11:00', available: true },
-            { time: '14:00', available: true },
-            { time: '15:00', available: true },
-          ],
-        }))
-        
-        setAvailableSlots(slotsComProfissionaisReais)
+        // 2. Faz as chamadas simultâneas para buscar os horários de todos eles
+        const slotsPromises = profs.map(async (p: any) => {
+          try {
+            const times = await professionalService.getProfessionalSlots(p.id, selectedDate, booking.serviceId!);
+            
+            // Se o backend não retornou nada, ignora este profissional
+            if (!times || times.length === 0) return null;
+
+            // Converte ["14:00:00"] para o formato da UI [{ time: "14:00", available: true }]
+            const formattedSlots = times.map((t: string) => ({
+              time: t.substring(0, 5),
+              available: true
+            }));
+
+            return {
+              id: p.id,
+              name: p.nome || p.name,
+              initials: (p.nome || p.name).substring(0, 2).toUpperCase(),
+              slots: formattedSlots
+            };
+          } catch (error) {
+            console.error(`Erro ao buscar horários para o prof. ${p.id}`, error);
+            return null; // Se der erro num profissional específico, ignora só ele
+          }
+        });
+
+        // 3. Resolve todas as requisições e filtra os nulos (profissionais sem horário)
+        const resolvedSlots = (await Promise.all(slotsPromises)).filter(Boolean) as ProfessionalSlots[];
+        setAvailableSlots(resolvedSlots);
+
       } catch (error) {
-        console.error("Erro ao carregar profissionais", error)
+        console.error("Erro geral ao carregar a agenda", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    loadProfessionals()
-  }, []) 
+
+    loadSlots();
+  }, [selectedDate, booking.serviceId]); // O array de dependências garante o recarregamento automático
 
   function handleSlotClick(professionalId: string, time: string) {
     setSelectedTime(time)
@@ -75,11 +115,12 @@ export default function Step2DateTime({ onNext, onBack }: Props) {
     })
   }
 
-  const selectedDay = mockDays.find(d => d.date === selectedDate)
+  const selectedDay = dynamicDays.find(d => d.date === selectedDate)
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
-      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
+      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6 shadow-sm border border-[var(--border)]">
+        
         <button
           onClick={onBack}
           style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
@@ -88,37 +129,40 @@ export default function Step2DateTime({ onNext, onBack }: Props) {
           <ChevronLeft size={16} />
           Voltar
         </button>
+
         <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold flex items-center gap-2 mb-4">
           <Calendar size={16} style={{ color: 'var(--brand)' }} />
           Escolha a Data
         </h2>
         <DateSelector
-          days={mockDays}
+          days={dynamicDays}
           selectedDate={selectedDate}
-          onSelect={(date) => {
-            setSelectedDate(date)
-            setSelectedTime(null)
-            setSelectedProfessionalId(null)
-          }}
+          onSelect={(date) => setSelectedDate(date)}
         />
       </div>
 
-      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
+      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6 shadow-sm border border-[var(--border)]">
         <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold flex items-center gap-2 mb-1">
           <Clock size={16} style={{ color: 'var(--brand)' }} />
           Horários Disponíveis
         </h2>
         
         {selectedDay && (
-          <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-4">
-            {selectedDay.label.toLowerCase()}, {selectedDay.day} de {selectedDay.month === 'mai' ? 'maio' : 'junho'}
+          <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-4 capitalize">
+            {selectedDay.label.toLowerCase()}, {selectedDay.day} de {selectedDay.month}
           </p>
         )}
 
         {loading ? (
-          <p className="text-center py-4" style={{ color: 'var(--text-muted)' }}>Carregando profissionais...</p>
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--brand)' }}></div>
+          </div>
+        ) : availableSlots.length === 0 ? (
+          <p className="text-center py-8 font-medium" style={{ color: 'var(--text-muted)' }}>
+            Não há horários disponíveis para esta data.
+          </p>
         ) : (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 animate-in fade-in duration-300">
             {availableSlots.map(professional => (
               <ProfessionalSlotsComponent
                 key={professional.id}
@@ -139,7 +183,7 @@ export default function Step2DateTime({ onNext, onBack }: Props) {
           backgroundColor: selectedTime ? 'var(--brand)' : 'var(--bg-elevated)',
           color: selectedTime ? '#000' : 'var(--text-muted)',
         }}
-        className="w-full py-3 rounded-xl font-semibold transition-colors disabled:cursor-not-allowed"
+        className="w-full py-3.5 rounded-xl font-bold transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
         Próximo
       </button>

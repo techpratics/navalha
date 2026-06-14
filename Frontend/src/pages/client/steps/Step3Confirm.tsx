@@ -21,7 +21,6 @@ function formatDate(date: string) {
 }
 
 export default function Step3Confirm({ booking, onBack, onNext }: Props) {
-  // A UI consome o Hook e passa as responsabilidades
   const { submitAppointment, loading, errorMsg } = useSubmitAppointment({ 
     booking, 
     onSuccess: onNext 

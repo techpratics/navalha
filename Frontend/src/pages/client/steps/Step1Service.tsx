@@ -1,4 +1,6 @@
-import { ChevronRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Scissors, ChevronRight } from 'lucide-react'
+import { catalogService } from '../../../services/catalog.service'
 import type { BookingState } from '../../../types/appointment'
 
 interface Props {
@@ -6,52 +8,92 @@ interface Props {
   onNext: (data: Partial<BookingState>) => void
 }
 
-const mockServices = [
-  { id: '1', name: 'Corte Masculino', duration: 30, price: 4500 },
-  { id: '2', name: 'Barba', duration: 20, price: 3000 },
-  { id: '3', name: 'Corte + Barba', duration: 45, price: 6500 },
-  { id: '4', name: 'Sobrancelha', duration: 15, price: 2000 },
-]
-
 function formatPrice(cents: number) {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 export default function Step1Service({ onNext }: Props) {
-  function handleSelect(id: string, name: string, duration: number, price: number) {
-    onNext({ serviceId: id, serviceName: name, serviceDuration: duration, servicePrice: price })
+  const [services, setServices] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+
+  // Busca os serviços reais do catálogo no banco de dados
+  useEffect(() => {
+    async function loadServices() {
+      setLoading(true)
+      try {
+        const data = await catalogService.getServices()
+        setServices(data || [])
+      } catch (error) {
+        console.error("Erro ao carregar serviços do catálogo:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadServices()
+  }, [])
+
+  function handleSelect(service: any) {
+    const price = service.precoEmCentavos || (service.preco ? service.preco * 100 : 0)
+    
+    onNext({ 
+      serviceId: service.id, 
+      serviceName: service.nome,
+      serviceDuration: service.duracaoMinutos ?? 30, 
+      servicePrice: price
+    })
   }
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
-      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6">
+      <div style={{ backgroundColor: 'var(--bg-surface)' }} className="rounded-2xl p-4 md:p-6 shadow-sm border border-[var(--border)]">
 
-        <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold mb-1">
-          Escolha o Servico
+        <h2 style={{ color: 'var(--text-primary)' }} className="font-semibold mb-1 flex items-center gap-2">
+          <Scissors size={18} style={{ color: 'var(--brand)' }} />
+          Escolha o Serviço
         </h2>
         <p style={{ color: 'var(--text-secondary)' }} className="text-sm mb-6">
-          O que vamos fazer no seu atendimento?
+          O que vamos fazer hoje?
         </p>
 
-        <div className="flex flex-col gap-2">
-          {mockServices.map(service => (
-            <button
-              key={service.id}
-              onClick={() => handleSelect(service.id, service.name, service.duration, service.price)}
-              style={{ borderColor: 'var(--border)' }}
-              className="flex items-center justify-between p-4 rounded-xl border hover:border-amber-500 transition-colors text-left"
-            >
-              <div>
-                <p style={{ color: 'var(--text-primary)' }} className="font-medium">{service.name}</p>
-                <p style={{ color: 'var(--text-secondary)' }} className="text-sm">{service.duration} min</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span style={{ color: 'var(--text-primary)' }} className="font-medium">{formatPrice(service.price)}</span>
-                <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-              </div>
-            </button>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--brand)' }}></div>
+          </div>
+        ) : services.length === 0 ? (
+          <p className="text-center py-8 font-medium" style={{ color: 'var(--text-muted)' }}>
+            Nenhum serviço disponível no momento.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3 animate-in fade-in duration-300">
+            {services.map(s => {
+              const precoExibido = s.precoEmCentavos ? s.precoEmCentavos : (s.preco ? s.preco * 100 : 0)
+              const duracaoExibida = s.duracaoMinutos ?? 30
+
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => handleSelect(s)}
+                  style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-elevated)' }}
+                  className="flex items-center gap-4 p-4 rounded-xl border hover:border-[var(--brand)] transition-all text-left group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center group-hover:bg-[var(--brand)] group-hover:text-black transition-colors">
+                    <Scissors size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <p style={{ color: 'var(--text-primary)' }} className="font-semibold">{s.nome}</p>
+                    <p style={{ color: 'var(--text-secondary)' }} className="text-xs mt-0.5">{duracaoExibida} min</p>
+                  </div>
+                  <div className="text-right flex items-center gap-3">
+                    <span style={{ color: 'var(--brand)' }} className="font-bold text-sm">
+                      {formatPrice(precoExibido)}
+                    </span>
+                    <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} className="group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
 
       </div>
     </div>

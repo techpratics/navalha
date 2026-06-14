@@ -1,10 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { scheduleService } from '../services/schedule.service';
-import type { Appointment } from '../types/appointment';
+import type { BookingState } from '../types/appointment';
 
-function getClientIdFromToken(): string | null {
+// Função atualizada: Lê o ID direto do usuário logado no storage
+function getClientId(): string | null {
   try {
-    const token = localStorage.getItem('token'); 
+    // 1. Tenta pegar direto do objeto de usuário (Mais fácil e limpo)
+    const userStr = localStorage.getItem('@Navalha:user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user.id) return user.id;
+    }
+
+    // 2. Fallback: Se não achar o user, tenta ler o token com o nome correto
+    const token = localStorage.getItem('@Navalha:token'); 
     if (!token) return null;
 
     const base64Url = token.split('.')[1];
@@ -16,79 +25,55 @@ function getClientIdFromToken(): string | null {
     const decoded = JSON.parse(jsonPayload);
     return decoded.id || decoded.sub || null; 
   } catch (error) {
-    console.error("Erro ao decodificar o token:", error);
+    console.error("Erro ao resgatar o ID do cliente:", error);
     return null;
   }
 }
 
-export function useAppointments() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+interface UseSubmitAppointmentProps {
+  booking: BookingState;
+  onSuccess: () => void;
+}
+
+export function useSubmitAppointment({ booking, onSuccess }: UseSubmitAppointmentProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const fetchAppointments = useCallback(async () => {
-    const clienteId = getClientIdFromToken();
-    
-    // Fallback temporário para testes enquanto o login não está 100%
-    const idParaBuscar = clienteId || "b4402afd-93fc-407f-a3bc-f9080a94ce40";
+  const submitAppointment = async () => {
+    if (!booking.professionalId || !booking.serviceId || !booking.date || !booking.time) {
+      setErrorMsg("Dados de agendamento incompletos.");
+      return;
+    }
+
+    // Chama a nossa nova função
+    const clienteId = getClientId();
+
+    if (!clienteId) {
+      setErrorMsg("Erro de autenticação. Por favor, faça login novamente.");
+      return;
+    }
 
     setLoading(true);
-    setError(null);
+    setErrorMsg(null);
+
     try {
-      const response = await scheduleService.getClientAppointments(idParaBuscar);
-      
-      const sorted = (response || []).sort((a: Appointment, b: Appointment) => {
-        const dateCompare = a.date.localeCompare(b.date);
-        if (dateCompare !== 0) return dateCompare;
-        return a.time.localeCompare(b.time);
+      await scheduleService.createClientAppointment({
+        profissionalId: booking.professionalId,
+        servicoId: booking.serviceId,
+        data: booking.date,
+        horarioInicio: booking.time.length === 5 ? `${booking.time}:00` : booking.time,
+        clienteId: clienteId 
       });
-      
-      setAppointments(sorted);
-    } catch (err: any) {
-      console.error("Erro ao buscar agendamentos:", err);
-      setError("Não foi possível carregar o seu histórico de agendamentos.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
-  useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments]);
-
-  const canCancel = (date: string, time: string) => {
-    const appointmentDate = new Date(`${date}T${time}`);
-    const now = new Date();
-    
-    const diffInHours = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    return diffInHours >= 2;
-  };
-
-  const cancelAppointment = async (id: string) => {
-    setLoading(true);
-    try {
-      await scheduleService.updateAppointmentStatus(id, 'CANCELADO');
-      
-      setAppointments(prev => 
-        prev.map(app => app.id === id ? { ...app, status: 'cancelled' } : app)
-      );
-      
-      alert("Agendamento cancelado com sucesso!");
-    } catch (err: any) {
-      console.error("Erro ao cancelar:", err);
-      alert(err.response?.data?.erro || "Erro ao cancelar o agendamento.");
+      onSuccess();
+    } catch (error: any) {
+      console.error('Erro ao confirmar:', error);
+      const backendError = error.response?.data?.erro || error.response?.data?.message || 'Este horário não está mais disponível. Por favor, tente outro.';
+      setErrorMsg(backendError);
     } finally {
       setLoading(false);
     }
   };
 
-  return { 
-    appointments, 
-    loading, 
-    error, 
-    fetchAppointments, 
-    cancelAppointment, 
-    canCancel 
-  };
+  return { submitAppointment, loading, errorMsg };
 }
