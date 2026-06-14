@@ -43,5 +43,38 @@ export const scheduleService = {
       status: statusMap[item.status] || 'pending',
       priceInCents: 0 
     }));
+  },
+
+  async updateAppointmentStatus(id: string, newStatus: 'CONFIRMADO' | 'CANCELADO'): Promise<void> {
+    await api.patch(`/agendamentos/${id}/status`, {
+      status: newStatus
+    });
+  },
+  
+  async createAppointment(payload: {
+    profissionalId: string;
+    clienteId: string;
+    servicoId: string;
+    data: string;
+    horarioInicio: string;
+  }): Promise<void> {
+    await api.post('/agendamentos/admin', payload);
+  },
+
+  async createClientAppointment(data: {
+    profissionalId: string;
+    clienteId: string;
+    servicoId: string;
+    data: string;
+    horarioInicio: string;
+  }): Promise<any> {
+    const response = await api.post('/agendamentos/meu-agendamento', data);
+    return response.data;
+  },
+
+  async getClientAppointments(clienteId: string): Promise<any[]> {
+    const response = await api.get(`/agendamentos/${clienteId}`);
+    return response.data || [];
   }
+
 };

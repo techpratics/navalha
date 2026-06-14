@@ -1,7 +1,10 @@
 import AdminLayout from '../../components/layout/AdminLayout'
 import AppointmentCard from '../../components/appointments/AppointmentCard'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, LayoutGrid, Columns, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, LayoutGrid, Columns, Clock, CalendarPlus } from 'lucide-react'
 import { useSchedule } from '../../hooks/useSchedule'
+import AppointmentModal from '../../components/appointments/AppointmentModal'
+import AppointmentFormModal from '../../components/appointments/AppointmentFormModal';
+import { useState } from 'react'
 
 // Helper para formatar a data local para o formato do banco (YYYY-MM-DD)
 const getLocalFormattedDate = (date: Date) => {
@@ -21,6 +24,10 @@ export default function AdminSchedulePage() {
     handleNext, 
     handleToday 
   } = useSchedule()
+
+  const [selectedApp, setSelectedApp] = useState<any>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [rescheduleData, setRescheduleData] = useState<any>(null);
 
   // LÓGICA DO DIA
   const dailyDateStr = getLocalFormattedDate(currentDate);
@@ -63,13 +70,25 @@ export default function AdminSchedulePage() {
       <div className="max-w-6xl mx-auto flex flex-col h-full gap-6 pb-10">
         
         {/* Cabeçalho */}
-        <div>
-          <h1 style={{ color: 'var(--text-primary)' }} className="text-2xl font-bold mb-1">Agenda Geral</h1>
-          <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
-            Gerencie os agendamentos e horários da barbearia
-          </p>
+        <div className="flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4">
+          <div>
+            <h1 style={{ color: 'var(--text-primary)' }} className="text-2xl font-bold mb-1">Agenda Geral</h1>
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
+              Gerencie os agendamentos e horários da barbearia
+            </p>
+          </div>
+          
+          <button 
+            onClick={() => {
+              setRescheduleData(null); 
+              setIsFormOpen(true);   
+            }}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--brand)] text-black font-bold rounded-xl hover:opacity-90 transition-opacity shadow-sm w-full sm:w-auto"
+          >
+            <CalendarPlus size={20} />
+            <span>Novo Agendamento</span>
+          </button>
         </div>
-
         {/* Barra de Controles */}
         <div 
           style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
@@ -88,11 +107,10 @@ export default function AdminSchedulePage() {
               <button onClick={handlePrevious} style={{ color: 'var(--text-secondary)' }} className="p-2 hover:text-[var(--brand)] transition-colors bg-[var(--bg-elevated)] rounded-lg">
                 <ChevronLeft size={20} />
               </button>
-              <h2 style={{ color: 'var(--text-primary)' }} className="text-base md:text-lg font-semibold min-w-[140px] text-center capitalize">
-                {viewMode === 'weekly' 
-                  ? `Semana ${startOfWeek.getDate()}/${startOfWeek.getMonth() + 1}`
-                  : currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-                }
+              <h2 style={{ color: 'var(--text-primary)' }} className="text-base md:text-lg font-semibold min-w-[220px] text-center capitalize">
+                {viewMode === 'daily' && currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                {viewMode === 'weekly' && `Semana ${startOfWeek.getDate()}/${String(startOfWeek.getMonth() + 1).padStart(2, '0')}`}
+                {viewMode === 'monthly' && currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
               </h2>
               <button onClick={handleNext} style={{ color: 'var(--text-secondary)' }} className="p-2 hover:text-[var(--brand)] transition-colors bg-[var(--bg-elevated)] rounded-lg">
                 <ChevronRight size={20} />
@@ -143,7 +161,13 @@ export default function AdminSchedulePage() {
               <div className="flex flex-col gap-3">
                 {dailyAppointments.length > 0 ? (
                   dailyAppointments.map((app) => (
-                    <AppointmentCard key={app.id} appointment={app} view="professional" />
+                    <div 
+                      key={app.id} 
+                      onClick={() => setSelectedApp(app)} 
+                      className="cursor-pointer transition-transform hover:scale-[1.01]"
+                    >
+                      <AppointmentCard appointment={app} view="professional" />
+                    </div>
                   ))
                 ) : (
                   <div className="text-center py-10" style={{ color: 'var(--text-muted)' }}>
@@ -179,6 +203,7 @@ export default function AdminSchedulePage() {
                         {dayApps.map(app => (
                           <div 
                             key={app.id}
+                            onClick={() => setSelectedApp(app)}
                             style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}
                             className="p-2 rounded-xl border text-sm flex flex-col gap-1 cursor-pointer hover:border-amber-500/50 transition-colors"
                           >
@@ -245,8 +270,9 @@ export default function AdminSchedulePage() {
                         {dayApps.slice(0, 3).map(app => (
                           <div 
                             key={app.id} 
+                            onClick={() => setSelectedApp(app)}
                             style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: 'var(--brand)' }}
-                            className="text-[10px] px-1.5 py-0.5 rounded truncate font-medium flex items-center gap-1"
+                            className="text-[10px] px-1.5 py-0.5 rounded truncate font-medium flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
                           >
                             <Clock size={8} className="shrink-0" />
                             <span className="truncate">{app.time} - {app.clientName}</span>
@@ -263,6 +289,37 @@ export default function AdminSchedulePage() {
                 })}
               </div>
             </div>
+          )}
+
+          {/* Renderização do Modal */}
+          {selectedApp && (
+            <AppointmentModal
+              appointment={selectedApp}
+              isOpen={!!selectedApp}
+              onClose={() => setSelectedApp(null)}
+              onSuccess={() => {
+                setSelectedApp(null);
+                window.location.reload(); 
+              }}
+              onReschedule={(app) => {
+                setSelectedApp(null);
+                setRescheduleData(app);
+                setIsFormOpen(true);
+              }}
+            />
+          )}
+          {isFormOpen && (
+             <AppointmentFormModal 
+               isOpen={isFormOpen}
+               rescheduleData={rescheduleData}
+               onClose={() => {
+                 setIsFormOpen(false);
+                 setRescheduleData(null);
+               }}
+               onSuccess={() => {
+                 window.location.reload(); 
+               }}
+             />
           )}
 
         </div>

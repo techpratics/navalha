@@ -1,113 +1,94 @@
-import { useState } from 'react'
-import type { Appointment } from '../types/appointment'
+import { useState, useEffect, useCallback } from 'react';
+import { scheduleService } from '../services/schedule.service';
+import type { Appointment } from '../types/appointment';
 
-const mockAppointments: Appointment[] = [
-  {
-    id: '1',
-    professionalName: 'Carlos Silva',
-    professionalInitials: 'CS',
-    clientName: 'João Oliveira',
-    clientInitials: 'JO',
-    serviceName: 'Corte Masculino',
-    date: '2026-05-31',
-    time: '09:00',
-    durationMinutes: 30,
-    priceInCents: 4500,
-    status: 'confirmed',
-  },
-  {
-    id: '4',
-    professionalName: 'Carlos Silva',
-    professionalInitials: 'CS',
-    clientName: 'Ricardo Santos',
-    clientInitials: 'RS',
-    serviceName: 'Barba',
-    date: '2026-05-31',
-    time: '10:30',
-    durationMinutes: 20,
-    priceInCents: 3000,
-    status: 'confirmed',
-  },
-  {
-    id: '5',
-    professionalName: 'Carlos Silva',
-    professionalInitials: 'CS',
-    clientName: 'Marcos Souza',
-    clientInitials: 'MS',
-    serviceName: 'Corte + Barba',
-    date: '2026-05-31',
-    time: '14:00',
-    durationMinutes: 45,
-    priceInCents: 6500,
-    status: 'confirmed',
-  },
-  {
-    id: '2',
-    professionalName: 'Ana Beatriz',
-    professionalInitials: 'AB',
-    clientName: 'Paulo Lima',
-    clientInitials: 'PL',
-    serviceName: 'Corte + Barba',
-    date: '2026-05-31',
-    time: '14:00',
-    durationMinutes: 45,
-    priceInCents: 6500,
-    status: 'pending',
-  },
-  {
-    id: '3',
-    professionalName: 'Carlos Silva',
-    professionalInitials: 'CS',
-    clientName: 'Felipe Neves',
-    clientInitials: 'FN',
-    serviceName: 'Barba',
-    date: '2026-06-18',
-    time: '09:30',
-    durationMinutes: 20,
-    priceInCents: 3000,
-    status: 'confirmed',
-  },
-]
+function getClientIdFromToken(): string | null {
+  try {
+    const token = localStorage.getItem('token'); 
+    if (!token) return null;
+
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const decoded = JSON.parse(jsonPayload);
+    return decoded.id || decoded.sub || null; 
+  } catch (error) {
+    console.error("Erro ao decodificar o token:", error);
+    return null;
+  }
+}
 
 export function useAppointments() {
-  const [appointments, setAppointments] = useState<Appointment[]>(
-    [...mockAppointments].sort((a, b) => {
-      const dateCompare = a.date.localeCompare(b.date)
-      if (dateCompare !== 0) return dateCompare
-      return a.time.localeCompare(b.time)
-    })
-  )
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addAppointment = (newApp: Omit<Appointment, 'id'>) => {
-    const appointment: Appointment = {
-      ...newApp,
-      id: Math.random().toString(36).substr(2, 9)
-    }
+  const fetchAppointments = useCallback(async () => {
+    const clienteId = getClientIdFromToken();
     
-    setAppointments(prev => {
-      const updated = [...prev, appointment]
-      return updated.sort((a, b) => {
-        const dateCompare = a.date.localeCompare(b.date)
-        if (dateCompare !== 0) return dateCompare
-        return a.time.localeCompare(b.time)
-      })
-    })
-  }
+    // Fallback temporário para testes enquanto o login não está 100%
+    const idParaBuscar = clienteId || "b4402afd-93fc-407f-a3bc-f9080a94ce40";
 
-  const checkAvailability = (date: string, time: string, duration: number, professionalName: string) => {
-    const newStartTime = new Date(`${date}T${time}`).getTime()
-    const newEndTime = newStartTime + duration * 60000
-
-    return !appointments.some(app => {
-      if (app.date !== date || app.professionalName !== professionalName || app.status === 'cancelled') return false
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await scheduleService.getClientAppointments(idParaBuscar);
       
-      const appStartTime = new Date(`${app.date}T${app.time}`).getTime()
-      const appEndTime = appStartTime + app.durationMinutes * 60000
+      const sorted = (response || []).sort((a: Appointment, b: Appointment) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.time.localeCompare(b.time);
+      });
+      
+      setAppointments(sorted);
+    } catch (err: any) {
+      console.error("Erro ao buscar agendamentos:", err);
+      setError("Não foi possível carregar o seu histórico de agendamentos.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-      // Sobreposição: (Inicio1 < Fim2) && (Inicio2 < Fim1)
-      return newStartTime < appEndTime && appStartTime < newEndTime
-    })
-  }
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
-  return { appointments, addAppointment, checkAvailability }
+  const canCancel = (date: string, time: string) => {
+    const appointmentDate = new Date(`${date}T${time}`);
+    const now = new Date();
+    
+    const diffInHours = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    return diffInHours >= 2;
+  };
+
+  const cancelAppointment = async (id: string) => {
+    setLoading(true);
+    try {
+      await scheduleService.updateAppointmentStatus(id, 'CANCELADO');
+      
+      setAppointments(prev => 
+        prev.map(app => app.id === id ? { ...app, status: 'cancelled' } : app)
+      );
+      
+      alert("Agendamento cancelado com sucesso!");
+    } catch (err: any) {
+      console.error("Erro ao cancelar:", err);
+      alert(err.response?.data?.erro || "Erro ao cancelar o agendamento.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { 
+    appointments, 
+    loading, 
+    error, 
+    fetchAppointments, 
+    cancelAppointment, 
+    canCancel 
+  };
 }

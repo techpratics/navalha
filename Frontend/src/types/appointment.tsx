@@ -28,8 +28,10 @@ export interface Appointment {
   professionalId: string;
   professionalInitials: string
   clientName: string
+  clientId: string;
   clientInitials: string
   serviceName: string
+  serviceId: string;
   date: string
   time: string
   durationMinutes: number

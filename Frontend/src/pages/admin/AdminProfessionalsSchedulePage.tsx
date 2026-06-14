@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import AdminLayout from '../../components/layout/AdminLayout'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Scissors, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Scissors, Clock } from 'lucide-react'
 import { useProfessionalsSchedule } from '../../hooks/useProfessionalsSchedule'
+import AppointmentModal from '../../components/appointments/AppointmentModal'
+import AppointmentFormModal from '../../components/appointments/AppointmentFormModal'
 
 const statusConfig = {
   confirmed: { label: 'Confirmado', className: 'bg-green-500/20 text-green-500 border-green-500/30' },
@@ -18,6 +21,11 @@ export default function AdminProfessionalsSchedulePage() {
     handleNext,
     handleToday
   } = useProfessionalsSchedule()
+
+  // Estados para controlar os modais (mesma lógica da Agenda Geral)
+  const [selectedApp, setSelectedApp] = useState<any>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [rescheduleData, setRescheduleData] = useState<any>(null)
 
   return (
     <AdminLayout>
@@ -49,13 +57,13 @@ export default function AdminProfessionalsSchedulePage() {
               <ChevronLeft size={20} />
             </button>
             <h2 style={{ color: 'var(--text-primary)' }} className="text-lg font-semibold min-w-[200px] text-center capitalize">
-              {currentDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+              {currentDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
             </h2>
             <button onClick={handleNext} style={{ color: 'var(--text-secondary)' }} className="p-2 hover:text-[var(--brand)] transition-colors bg-[var(--bg-elevated)] rounded-lg">
               <ChevronRight size={20} />
             </button>
           </div>
-          <div className="w-[68px] hidden sm:block"></div> {/* Espaçador visual equilibrado */}
+          <div className="w-[68px] hidden sm:block"></div>
         </div>
 
         {/* FEEDBACK DE CARREGAMENTO */}
@@ -79,7 +87,7 @@ export default function AdminProfessionalsSchedulePage() {
                     style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
                     className="w-80 border rounded-2xl flex flex-col max-h-[calc(100vh-260px)] shadow-sm"
                   >
-                    {/* Topo da Coluna (Nome do Barbeiro) */}
+                    {/* Topo da Coluna */}
                     <div style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }} className="p-4 border-b flex items-center gap-3 shrink-0 rounded-t-2xl">
                       <div className="w-9 h-9 rounded-full bg-amber-500/10 text-amber-500 font-bold flex items-center justify-center text-sm">
                         {group.professionalInitials}
@@ -90,26 +98,25 @@ export default function AdminProfessionalsSchedulePage() {
                       </div>
                     </div>
 
-                    {/* Lista de Cards de Agendamento da Coluna */}
+                    {/* Lista de Cards */}
                     <div className="p-3 flex flex-col gap-3 overflow-y-auto flex-1">
                       {group.appointments.map((app) => (
                         <div 
                           key={app.id}
+                          onClick={() => setSelectedApp(app)} // <-- ADICIONAMOS O CLICK AQUI
                           style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}
-                          className="p-3 rounded-xl border flex flex-col gap-2 hover:border-amber-500/40 transition-colors group"
+                          className="p-3 rounded-xl border flex flex-col gap-2 hover:border-amber-500/40 transition-colors group cursor-pointer" // <-- ADICIONAMOS CURSOR-POINTER
                         >
-                          {/* Horário e Status */}
                           <div className="flex items-center justify-between">
                             <span style={{ color: 'var(--brand)' }} className="font-black text-base flex items-center gap-1">
                               <Clock size={14} />
                               {app.time}
                             </span>
-                            <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${statusConfig[app.status].className}`}>
-                              {statusConfig[app.status].label}
+                            <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${statusConfig[app.status]?.className || statusConfig.pending.className}`}>
+                              {statusConfig[app.status]?.label || 'Pendente'}
                             </span>
                           </div>
 
-                          {/* Cliente e Serviço */}
                           <div>
                             <p style={{ color: 'var(--text-primary)' }} className="font-bold text-sm leading-tight">{app.clientName}</p>
                             <p style={{ color: 'var(--text-secondary)' }} className="text-xs flex items-center gap-1 mt-1">
@@ -118,7 +125,6 @@ export default function AdminProfessionalsSchedulePage() {
                             </p>
                           </div>
 
-                          {/* Duração */}
                           <div className="text-[10px] text-right" style={{ color: 'var(--text-muted)' }}>
                             {app.durationMinutes} min
                           </div>
@@ -129,7 +135,7 @@ export default function AdminProfessionalsSchedulePage() {
                 ))
               ) : (
                 <div className="w-full text-center py-20" style={{ color: 'var(--text-muted)' }}>
-                  Nenhum atendimento agendado para nenhum profissional na data de hoje.
+                  Nenhum atendimento agendado para nenhum profissional na data selecionada.
                 </div>
               )}
 
@@ -138,6 +144,40 @@ export default function AdminProfessionalsSchedulePage() {
         )}
 
       </div>
+
+      {/* Renderização do Modal de Detalhes / Cancelar */}
+      {selectedApp && (
+        <AppointmentModal
+          appointment={selectedApp}
+          isOpen={!!selectedApp}
+          onClose={() => setSelectedApp(null)}
+          onSuccess={() => {
+            setSelectedApp(null);
+            window.location.reload(); 
+          }}
+          onReschedule={(app) => {
+            setSelectedApp(null);
+            setRescheduleData(app);
+            setIsFormOpen(true);
+          }}
+        />
+      )}
+
+      {/* Renderização do Modal de Reagendamento / Novo Agendamento */}
+      {isFormOpen && (
+        <AppointmentFormModal 
+          isOpen={isFormOpen}
+          rescheduleData={rescheduleData}
+          onClose={() => {
+            setIsFormOpen(false);
+            setRescheduleData(null);
+          }}
+          onSuccess={() => {
+            window.location.reload();
+          }}
+        />
+      )}
+
     </AdminLayout>
   )
 }
