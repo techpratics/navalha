@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> {
 
     List<Agendamento> findByProfissionalIdAndDataAndStatusNot(
-            UUID profissionalId, LocalDate data, String status);
+            UUID profissionalId, LocalDate data, Collection<StatusAgendamento> status);
 
     List<Agendamento> findByClienteId(UUID clienteId);
 
