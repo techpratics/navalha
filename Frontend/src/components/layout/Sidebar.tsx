@@ -1,11 +1,23 @@
 import { useState } from 'react'
 import { Scissors, Calendar, CalendarPlus, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAppointments } from '../../hooks/useAppointments' // Importamos o nosso hook!
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  
+  const { appointments } = useAppointments()
+
+  //FUNCAO PRA CONTAR A QUANTIDADE DE AGENDAMENTOS ATIVOS (NEM CANCELADOS, NEM PASSADOS)
+  const activeAppointmentsCount = appointments.filter(app => {
+    const isCancelled = app.status === 'cancelled'
+    
+    const appointmentDate = new Date(`${app.date}T${app.time}`)
+    const isPast = appointmentDate < new Date() 
+    return !isCancelled && !isPast
+  }).length
 
   return (
     <aside
@@ -66,7 +78,12 @@ export default function Sidebar() {
           <Calendar size={16} />
           <div className={`items-center justify-between w-full hidden ${collapsed ? '' : 'md:flex'}`}>
             <span className="text-sm font-medium">Agendamentos</span>
-            <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
+            {/* O badge agora só aparece se houver agendamentos ativos, e mostra o número real! */}
+            {activeAppointmentsCount > 0 && (
+              <span className="bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full animate-in zoom-in">
+                {activeAppointmentsCount}
+              </span>
+            )}
           </div>
         </button>
       </nav>

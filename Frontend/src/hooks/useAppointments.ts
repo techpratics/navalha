@@ -1,79 +1,92 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { scheduleService } from '../services/schedule.service';
-import type { BookingState } from '../types/appointment';
+import type { Appointment } from '../types/appointment';
 
-// Função atualizada: Lê o ID direto do usuário logado no storage
-function getClientId(): string | null {
-  try {
-    // 1. Tenta pegar direto do objeto de usuário (Mais fácil e limpo)
-    const userStr = localStorage.getItem('@Navalha:user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      if (user.id) return user.id;
-    }
-
-    // 2. Fallback: Se não achar o user, tenta ler o token com o nome correto
-    const token = localStorage.getItem('@Navalha:token'); 
-    if (!token) return null;
-
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-
-    const decoded = JSON.parse(jsonPayload);
-    return decoded.id || decoded.sub || null; 
-  } catch (error) {
-    console.error("Erro ao resgatar o ID do cliente:", error);
-    return null;
-  }
-}
-
-interface UseSubmitAppointmentProps {
-  booking: BookingState;
-  onSuccess: () => void;
-}
-
-export function useSubmitAppointment({ booking, onSuccess }: UseSubmitAppointmentProps) {
+export function useAppointments() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const submitAppointment = async () => {
-    if (!booking.professionalId || !booking.serviceId || !booking.date || !booking.time) {
-      setErrorMsg("Dados de agendamento incompletos.");
-      return;
-    }
-
-    // Chama a nossa nova função
-    const clienteId = getClientId();
-
-    if (!clienteId) {
-      setErrorMsg("Erro de autenticação. Por favor, faça login novamente.");
-      return;
-    }
-
+  const fetchAppointments = useCallback(async () => {
     setLoading(true);
-    setErrorMsg(null);
-
+    setError(null);
     try {
-      await scheduleService.createClientAppointment({
-        profissionalId: booking.professionalId,
-        servicoId: booking.serviceId,
-        data: booking.date,
-        horarioInicio: booking.time.length === 5 ? `${booking.time}:00` : booking.time,
-        clienteId: clienteId 
-      });
+      // Chama a API sem precisar passar IDs
+      const response = await scheduleService.getClientAppointments();
+      
+      // Mapeia o JSON retornado pelo backend para a interface do frontend
+      const mappedAppointments: Appointment[] = (response || []).map((app: any) => ({
+        id: app.id,
+        professionalName: app.nomeProfissional || 'Profissional',
+        professionalId: app.profissionalId || '',
+        professionalInitials: (app.nomeProfissional || 'PR').substring(0, 2).toUpperCase(),
+        clientName: app.nomeCliente || '',
+        clientId: app.clienteId || '',
+        clientInitials: (app.nomeCliente || 'CL').substring(0, 2).toUpperCase(),
+        serviceName: app.nomeServico || 'Serviço',
+        serviceId: app.servicoId || '',
+        date: app.data,
+        time: app.horarioInicio ? app.horarioInicio.substring(0, 5) : '', // Corta os segundos (:00)
+        durationMinutes: 45, // Como o response não trouxe duracaoMinutos, mantemos um fallback visual adequado
+        priceInCents: app.preco ? app.preco * 100 : 4000, // Fallback caso queira calcular depois
+        status: app.status?.toLowerCase() === 'cancelado' ? 'cancelled' : 
+               (app.status?.toLowerCase() === 'pendente' ? 'pending' : 'confirmed')
+      }));
 
-      onSuccess();
-    } catch (error: any) {
-      console.error('Erro ao confirmar:', error);
-      const backendError = error.response?.data?.erro || error.response?.data?.message || 'Este horário não está mais disponível. Por favor, tente outro.';
-      setErrorMsg(backendError);
+      // Ordena por data e horário (mais próximos primeiro)
+      const sorted = mappedAppointments.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.time.localeCompare(b.time);
+      });
+      
+      setAppointments(sorted);
+    } catch (err: any) {
+      console.error("Erro ao buscar agendamentos:", err);
+      setError("Não foi possível carregar os seus agendamentos.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
+  // Regra de negócio: Cancelamento com antecedência mínima de 2 horas
+  const canCancel = (date: string, time: string) => {
+    const appointmentDate = new Date(`${date}T${time}`);
+    const now = new Date();
+    const diffInHours = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return diffInHours >= 2;
+  };
+
+  const cancelAppointment = async (id: string) => {
+    setLoading(true);
+    try {
+      // Atualiza o status no backend
+      await scheduleService.updateAppointmentStatus(id, 'CANCELADO');
+      
+      // Atualiza o estado local para mudar o badge na hora sem dar refetch
+      setAppointments(prev => 
+        prev.map(app => app.id === id ? { ...app, status: 'cancelled' } : app)
+      );
+      
+      alert("Agendamento cancelado com sucesso!");
+    } catch (err: any) {
+      console.error("Erro ao cancelar:", err);
+      alert(err.response?.data?.erro || "Erro ao cancelar o agendamento.");
     } finally {
       setLoading(false);
     }
   };
 
-  return { submitAppointment, loading, errorMsg };
+  return { 
+    appointments, 
+    loading, 
+    error, 
+    fetchAppointments, 
+    cancelAppointment, 
+    canCancel 
+  };
 }

@@ -72,8 +72,8 @@ export const scheduleService = {
     return response.data;
   },
 
-  async getClientAppointments(clienteId: string): Promise<any[]> {
-    const response = await api.get(`/agendamentos/${clienteId}`);
+  async getClientAppointments(): Promise<any[]> {
+    const response = await api.get('/agendamentos/meus-agendamentos');
     return response.data || [];
   }
 
