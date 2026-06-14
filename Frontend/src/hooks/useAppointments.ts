@@ -30,7 +30,8 @@ export function useAppointments() {
         durationMinutes: 45, // Como o response não trouxe duracaoMinutos, mantemos um fallback visual adequado
         priceInCents: app.preco ? app.preco * 100 : 4000, // Fallback caso queira calcular depois
         status: app.status?.toLowerCase() === 'cancelado' ? 'cancelled' : 
-               (app.status?.toLowerCase() === 'pendente' ? 'pending' : 'confirmed')
+        app.status?.toLowerCase() === 'concluido' ? 'completed' :
+        app.status?.toLowerCase() === 'pendente' ? 'pending' : 'confirmed'
       }));
 
       // Ordena por data e horário (mais próximos primeiro)
@@ -81,12 +82,47 @@ export function useAppointments() {
     }
   };
 
+  const completeAppointment = async (id: string) => {
+    setLoading(true);
+    try {
+      await scheduleService.updateAppointmentStatus(id, 'CONCLUIDO');
+      
+      setAppointments(prev => 
+        prev.map(app => app.id === id ? { ...app, status: 'completed' } : app)
+      );
+      
+      alert("Atendimento concluído com sucesso!");
+    } catch (err: any) {
+      console.error("Erro ao concluir:", err);
+      alert(err.response?.data?.erro || "Erro ao concluir o agendamento.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- FUNÇÕES DE ENCAIXE/MOCK (HU-30) ---
+  const checkAvailability = (date: string, time: string, durationMinutes: number, professionalName: string) => {
+    return true; // Libera sempre provisoriamente
+  };
+
+  const addAppointment = async (appointmentData: any) => {
+    const newApp = {
+      ...appointmentData,
+      id: Math.random().toString(36).substring(2, 9),
+      status: 'confirmed'
+    };
+    setAppointments(prev => [...prev, newApp]);
+  };
+
   return { 
     appointments, 
     loading, 
     error, 
     fetchAppointments, 
     cancelAppointment, 
-    canCancel 
+    canCancel,
+    checkAvailability, 
+    addAppointment,
+    completeAppointment
   };
 }

@@ -45,7 +45,7 @@ export const scheduleService = {
     }));
   },
 
-  async updateAppointmentStatus(id: string, newStatus: 'CONFIRMADO' | 'CANCELADO'): Promise<void> {
+  async updateAppointmentStatus(id: string, newStatus: 'CONFIRMADO' | 'CANCELADO' | 'CONCLUIDO'): Promise<void> {
     await api.patch(`/agendamentos/${id}/status`, {
       status: newStatus
     });

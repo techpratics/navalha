@@ -36,5 +36,5 @@ export interface Appointment {
   time: string
   durationMinutes: number
   priceInCents: number
-  status: 'confirmed' | 'pending' | 'cancelled'
+  status: 'confirmed' | 'pending' | 'cancelled' | 'completed'
 }

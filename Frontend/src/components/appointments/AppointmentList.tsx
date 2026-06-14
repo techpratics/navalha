@@ -1,10 +1,13 @@
-import { Calendar, Clock, Scissors, XCircle } from 'lucide-react'
+import { Calendar, CheckCircle2, Clock, Scissors, XCircle } from 'lucide-react'
 import type { Appointment } from '../../types/appointment'
+
 
 interface Props {
   appointments: Appointment[]
-  onCancel: (id: string) => void
-  canCancel: (date: string, time: string) => boolean
+  view?: 'client' | 'professional' 
+  onCancel?: (id: string) => void
+  onComplete?: (id: string) => void 
+  canCancel?: (date: string, time: string) => boolean
 }
 
 function formatDate(dateString: string) {
@@ -12,13 +15,14 @@ function formatDate(dateString: string) {
   return `${day}/${month}/${year}`
 }
 
-export default function AppointmentList({ appointments, onCancel, canCancel }: Props) {
+export default function AppointmentList({ appointments, view, onCancel, onComplete, canCancel }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {appointments.map((app) => {
         const isCancelled = app.status === 'cancelled'
+        const isCompleted = app.status === 'completed'
         const isPast = new Date(`${app.date}T${app.time}`) < new Date()
-        const isCancelable = canCancel(app.date, app.time)
+        const isCancelable = canCancel?.(app.date, app.time)
 
         return (
           <div 
@@ -49,10 +53,14 @@ export default function AppointmentList({ appointments, onCancel, canCancel }: P
               {/* BADGE DE STATUS */}
               <div className={`px-3 py-1 rounded-full text-xs font-semibold
                 ${isCancelled ? 'bg-red-500/10 text-red-500' : 
-                  app.status === 'pending' ? 'bg-blue-500/10 text-blue-500' : 
-                  'bg-green-500/10 text-green-500'}`}
+                  isCompleted ? 'bg-green-500/10 text-green-500' : 
+                  app.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 
+                  'bg-blue-500/10 text-blue-500'}`}
               >
-                {isCancelled ? 'Cancelado' : app.status === 'pending' ? 'Pendente' : 'Confirmado'}
+                {isCancelled ? 'Cancelado' : 
+                 isCompleted ? 'Concluído' : 
+                 app.status === 'pending' ? 'Pendente' : 
+                 'Confirmado'}
               </div>
             </div>
 
@@ -72,10 +80,10 @@ export default function AppointmentList({ appointments, onCancel, canCancel }: P
               </div>
             </div>
 
-            {/* BOTÃO DE CANCELAR (LÓGICA DA HU-44) */}
-            {!isCancelled && !isPast && (
+            {/* BOTÃO DE CANCELAR (VISÃO DO CLIENTE) */}
+            {view !== 'professional' && !isCancelled && !isPast && (
               <button
-                onClick={() => onCancel(app.id)}
+                onClick={() => onCancel && onCancel(app.id)}
                 disabled={!isCancelable}
                 className={`mt-2 flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium text-sm transition-colors border
                   ${isCancelable 
@@ -85,6 +93,19 @@ export default function AppointmentList({ appointments, onCancel, canCancel }: P
               >
                 <XCircle size={18} />
                 {isCancelable ? 'Cancelar Agendamento' : 'Cancelamento indisponível (menos de 2h)'}
+              </button>
+            )}
+
+            {/* BOTÃO DE CONCLUIR (VISÃO DO PROFISSIONAL) */}
+            {view === 'professional' && app.status === 'confirmed' && (
+              <button
+                onClick={() => onComplete && onComplete(app.id)}
+                style={{ borderColor: 'rgba(34, 197, 94, 0.3)', color: '#22c55e' }}
+                className="mt-2 flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium text-sm transition-colors border hover:bg-green-500/10 active:scale-[0.98] w-full"
+              >
+                {/* Lembre-se de importar o CheckCircle2 do lucide-react no topo do arquivo! */}
+                <CheckCircle2 size={18} />
+                Concluir Atendimento
               </button>
             )}
           </div>
