@@ -12,19 +12,24 @@
 
 - [Board do Projeto (ClickUp)](https://app.clickup.com/90171245411/v/s/90175723797)
 - [Documentação de Requisitos (Google Docs)](https://docs.google.com/document/d/14TAXifBhv1Tt1Tm4cGVbhKHskTcMTCM3/edit?usp=drive_link&ouid=109597382508282434795&rtpof=true&sd=true)
+- [Documento de Sprints](https://docs.google.com/document/d/1fS84MfhAbpekBTlM2FqldgBf8MSI_aha/edit?usp=drive_link&ouid=109597382508282434795&rtpof=true&sd=true)
 - [Pasta do Projeto (Google Drive)](https://drive.google.com/drive/folders/1pwW3LjfzHrEeARXwzhax_helfkJhnfj_?usp=sharing)
 
 ---
 
 ## 👥 Equipe de Desenvolvimento
 
-| Nome | Função Principal | GitHub |
+| Nome | Curso | GitHub |
 | :--- | :--- | :--- |
-| **Arthur Lelis** | Desenvolvedor | [@Arthur32p](https://github.com/Arthur32p) |
-| **Júlio Emanuel** | Desenvolvedor | [@DevJulioEmanuel](https://github.com/DevJulioEmanuel) |
-| **Mateus Valentim** | Desenvolvedor | [@mattsu014](https://github.com/mattsu014) |
-| **Victor Farias** | Desenvolvedor | [@vistomia](https://github.com/vistomia) |
-| **Rodrigo Rodrigues (fora da disciplina)** | Desenvolvedor | [@rudriguu2099](https://github.com/rudriguu2099) |
+| **Arthur Lelis** | Sistemas de Informação | [@Arthur32p](https://github.com/Arthur32p) |
+| **Júlio Emanuel** | Sistemas de Informação | [@DevJulioEmanuel](https://github.com/DevJulioEmanuel) |
+| **Mateus Valentim** | Engenharia de Computação | [@mattsu014](https://github.com/mattsu014) |
+| **Victor Farias** | Sistemas de Informação | [@vistomia](https://github.com/vistomia) |
+| **Rodrigo Rodrigues (fora da disciplina)** | Engenharia de Software | [@rudriguu2099](https://github.com/rudriguu2099) |
+
+---
+
+## 📖 Sobre o Projeto
 
 O **Navalha** é um sistema web robusto desenvolvido para o gerenciamento inteligente de barbearias e salões. Com foco na autonomia do cliente e na organização do profissional, a plataforma elimina processos manuais e centraliza toda a rotina de agendamentos em um ecossistema digital.
 
@@ -53,7 +58,7 @@ O sistema foi arquitetado em dois módulos principais para garantir uma experiê
 
 ### ✂️ Módulo do Profissional
 - **Gestão de Disponibilidade:** Configuração de dias úteis e blocos de horários de trabalho, com funcionalidade de replicação rápida para a semana.
-- **Agenda Diária Dinâmica:** Painel focado no dia atual com métricas de atendimentos (Total, Confirmados, Concluídos).
+- **Agenda Diária Dinâmica:** Painel focado no dia atual com métricas de atendimentos (Total, Confirmados, Pendentes).
 - **Controle de Fluxo:** Ações de mudança de status (Confirmar, Cancelar, Concluir Atendimento).
 - **Encaixes Rápidos:** Criação de agendamentos manuais (walk-ins) diretamente pelo painel para clientes sem cadastro prévio.
 - **Base de Clientes:** Listagem e filtro de clientes frequentes para ações de fidelização.
@@ -83,13 +88,56 @@ O projeto adota uma arquitetura baseada em API RESTful, separando completamente 
 
 ### ⚙️ Backend
 - **Java + Spring Boot:** Escolhido pela robustez, escalabilidade e facilidade na construção de APIs de nível corporativo. O ecossistema Spring permite implementações rápidas de segurança, injeção de dependências e mapeamento de banco de dados.
+- **PostgreSQL:** Banco de dados relacional utilizado para persistência dos dados de agendamentos, usuários e disponibilidade dos profissionais.
 - **Autenticação JWT (JSON Web Token):** O sistema utiliza tokens encodados em Base64 para garantir a identidade do usuário (Cliente ou Profissional) e proteger rotas sensíveis (ex: `@Navalha:token`).
+
+---
+
+## 🚀 Como Rodar o Projeto
+
+### Pré-requisitos
+
+- [Docker](https://www.docker.com/) e Docker Compose
+- [Node.js 18+](https://nodejs.org/) e [pnpm](https://pnpm.io/)
+
+---
+
+### ⚙️ Backend
+
+Suba o banco de dados e a API com Docker:
+
+```bash
+cd Backend
+docker-compose up -d
+```
+
+A API estará disponível em `http://localhost:8080`.
+A documentação Swagger estará em `http://localhost:8080/swagger-ui.html`.
+
+---
+
+### 🎨 Frontend
+
+**1. Instale as dependências:**
+
+```bash
+cd Frontend
+pnpm install
+```
+
+**2. Inicie o servidor de desenvolvimento:**
+
+```bash
+pnpm dev
+```
+
+O frontend estará disponível em `http://localhost:5173`.
 
 ---
 
 ## 🧠 Metodologia e Organização
 
-O projeto foi conduzido utilizando a metodologia ágil **Kanban**, garantindo entregas contínuas e estruturadas em Sprints de valor. A gestão do fluxo de trabalho proporcionou:
+O projeto foi conduzido utilizando a metodologia ágil **SCRUM**, garantindo entregas contínuas e estruturadas em Sprints de valor. A gestão do fluxo de trabalho proporcionou:
 - Mapeamento detalhado de User Stories.
 - Divisão rigorosa de tarefas entre frontend, backend e modelagem.
 - Acompanhamento do progresso da equipe em tempo real através do **ClickUp**.
@@ -98,4 +146,4 @@ O projeto foi conduzido utilizando a metodologia ágil **Kanban**, garantindo en
 
 ## 🎓 Observações Acadêmicas
 
-Este é um projeto acadêmico e de extensão desenvolvido por estudantes do curso de **Bacharelado em Sistemas de Informação** da **Universidade Federal do Ceará (UFC) - Campus Quixadá**. O projeto foi concebido sem fins lucrativos, com o objetivo principal de aplicar conhecimentos práticos de engenharia de software no desenvolvimento de aplicações reais e promover benefícios diretos à sociedade por meio da tecnologia.
+Este é um projeto acadêmico e de extensão desenvolvido durante os cursos **Engenharia de Computação | Engenharia de Software | Sistemas de Informação - Universidade Federal do Ceará (UFC), Campus Quixadá**. O projeto foi concebido sem fins lucrativos, com o objetivo principal de aplicar conhecimentos práticos de engenharia de software no desenvolvimento de aplicações reais e promover benefícios diretos à sociedade por meio da tecnologia.
