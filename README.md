@@ -24,7 +24,7 @@
 | **Júlio Emanuel** | Desenvolvedor | [@DevJulioEmanuel](https://github.com/DevJulioEmanuel) |
 | **Mateus Valentim** | Desenvolvedor | [@mattsu014](https://github.com/mattsu014) |
 | **Victor Farias** | Desenvolvedor | [@vistomia](https://github.com/vistomia) |
-| **Rodrigo Rodrigues** | Desenvolvedor | [@rudriguu2099](https://github.com/rudriguu2099) |
+| **Rodrigo Rodrigues (fora da disciplina)** | Desenvolvedor | [@rudriguu2099](https://github.com/rudriguu2099) |
 
 O **Navalha** é um sistema web robusto desenvolvido para o gerenciamento inteligente de barbearias e salões. Com foco na autonomia do cliente e na organização do profissional, a plataforma elimina processos manuais e centraliza toda a rotina de agendamentos em um ecossistema digital.
 
