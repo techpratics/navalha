@@ -1,11 +1,19 @@
 package com.alabamabarbers.Backend.controller;
 
 import com.alabamabarbers.Backend.controller.common.GenericController;
+import com.alabamabarbers.Backend.dto.AgendamentoResponseDTO;
+import com.alabamabarbers.Backend.dto.AssinaturaClienteResponseDTO;
+import com.alabamabarbers.Backend.dto.AtribuirAssinaturaRequestDTO;
 import com.alabamabarbers.Backend.dto.ClienteRequestDTO;
 import com.alabamabarbers.Backend.dto.ClienteResponseDTO;
+import com.alabamabarbers.Backend.dto.ClienteUpdateRequestDTO;
+import com.alabamabarbers.Backend.mapper.AgendamentoMapper;
 import com.alabamabarbers.Backend.mapper.ClienteMapper;
+import com.alabamabarbers.Backend.model.AssinaturaCliente;
 import com.alabamabarbers.Backend.model.Cliente;
 import com.alabamabarbers.Backend.model.Usuario;
+import com.alabamabarbers.Backend.service.AgendamentoService;
+import com.alabamabarbers.Backend.service.AssinaturaService;
 import com.alabamabarbers.Backend.service.ClienteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +33,9 @@ public class ClienteController implements GenericController {
 
     private final ClienteService service;
     private final ClienteMapper mapper;
+    private final AssinaturaService assinaturaService;
+    private final AgendamentoService agendamentoService;
+    private final AgendamentoMapper agendamentoMapper;
 
     @PostMapping
     public ResponseEntity<ClienteResponseDTO> create(@RequestBody @Valid ClienteRequestDTO dto) {
@@ -76,9 +87,12 @@ public class ClienteController implements GenericController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFISSIONAL')")
     public ResponseEntity<ClienteResponseDTO> updateById(
             @PathVariable UUID id,
-            @RequestBody @Valid ClienteRequestDTO dto
+            @RequestBody @Valid ClienteUpdateRequestDTO dto
     ) {
-        Cliente updated = service.update(id, mapper.toEntity(dto));
+        Cliente partial = new Cliente();
+        partial.setNome(dto.nome());
+        partial.setTelefone(dto.telefone());
+        Cliente updated = service.update(id, partial);
         return ResponseEntity.ok(mapper.toResponse(updated));
     }
 
@@ -87,5 +101,39 @@ public class ClienteController implements GenericController {
     public ResponseEntity<Void> alternarStatus(@PathVariable UUID id) {
         service.inverterStatus(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/assinatura")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> atribuirAssinatura(
+            @PathVariable UUID id,
+            @RequestBody @Valid AtribuirAssinaturaRequestDTO dto) {
+        AssinaturaCliente assinatura = assinaturaService.atribuirPlano(id, dto);
+        return ResponseEntity.created(gerarHeaderLocation(assinatura.getId())).build();
+    }
+
+    @GetMapping("/{id}/assinatura")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AssinaturaClienteResponseDTO> consultarAssinatura(@PathVariable UUID id) {
+        return ResponseEntity.ok(assinaturaService.consultarAssinatura(id));
+    }
+
+    @GetMapping("/minha-assinatura")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<AssinaturaClienteResponseDTO> consultarMinhaAssinatura(
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        Cliente cliente = service.findByUsuarioId(usuarioLogado.getId());
+        return ResponseEntity.ok(assinaturaService.consultarAssinatura(cliente.getId()));
+    }
+
+    @GetMapping("/{id}/historico")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AgendamentoResponseDTO>> historicoAtendimentos(@PathVariable UUID id) {
+        service.findById(id);
+        List<AgendamentoResponseDTO> historico = agendamentoService.findByClienteId(id)
+                .stream()
+                .map(agendamentoMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(historico);
     }
 }

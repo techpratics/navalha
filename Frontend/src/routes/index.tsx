@@ -10,6 +10,8 @@ import ProfessionalRegistrationPage from '../pages/admin/ProfessionalRegistratio
 import AdminProfessionalsPage from '../pages/admin/AdminProfessionalsPage'
 import AdminSchedulePage from '../pages/admin/AdminSchedulePage'  
 import AdminProfessionalsSchedulePage from '../pages/admin/AdminProfessionalsSchedulePage'
+import AdminReportsPage from '../pages/admin/AdminReportsPage'
+import AdminServicesPage from '../pages/admin/AdminServicesPage'
 import AvailabilityPage from '../pages/professional/AvailabilityPage'
 
 const PrivateRoute = ({ allowedRole }: { allowedRole: string }) => {
@@ -76,6 +78,8 @@ export default function AppRoutes() {
           <Route path="/admin/profissionais" element={<AdminProfessionalsPage />} />
           <Route path="/admin/agenda" element={<AdminSchedulePage />} />
           <Route path="/admin/agenda-profissionais" element={<AdminProfessionalsSchedulePage />} />
+          <Route path="/admin/relatorios" element={<AdminReportsPage />} />
+          <Route path="/admin/servicos" element={<AdminServicesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -99,5 +99,17 @@ export const professionalService = {
   async deleteAvailabilityDay(dispId: string): Promise<any> {
     const response = await api.delete(`/profissionais/disponibilidade/${dispId}`);
     return response.data;
+  },
+
+  // ADMIN: Busca disponibilidade de um profissional específico
+  async getAvailabilityById(profId: string): Promise<any[]> {
+    const response = await api.get(`/profissionais/${profId}/disponibilidade`);
+    return response.data || [];
+  },
+
+  // ADMIN: Cria um dia de disponibilidade para um profissional específico
+  async saveAvailabilityDayById(profId: string, data: { diaSemana: number; horaInicio: string; horaFim: string }): Promise<any> {
+    const response = await api.post(`/profissionais/${profId}/disponibilidade`, data);
+    return response.data;
   }
 };

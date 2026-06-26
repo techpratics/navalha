@@ -35,6 +35,14 @@ public class ServicosController implements GenericController {
         return ResponseEntity.created(location).body(savedService);
     }
 
+    @GetMapping("all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ServicosResponseDTO>> findAllAdmin(){
+        List<Servicos> servicos = servicosService.findAllAdmin();
+        List<ServicosResponseDTO> list = servicos.stream().map(servicosMapper::toResponse).toList();
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFISSIONAL', 'CLIENTE')")
     public ResponseEntity<List<ServicosResponseDTO>> findAll(){

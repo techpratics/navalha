@@ -51,16 +51,15 @@ public class ProfissionalDisponibilidadeService {
         repository.deleteById(dispId);
     }
 
+    @Transactional
     public ProfissionalDisponibilidade copiar(UUID id, int diaOrigem, int diaDestino) {
+        List<ProfissionalDisponibilidade> origens = repository.findByProfissionalIdAndDiaSemana(id, diaOrigem);
+        if (origens.isEmpty()) {
+            throw new RuntimeException("Dia de origem não encontrado");
+        }
+        ProfissionalDisponibilidade origem = origens.get(0);
 
-        ProfissionalDisponibilidade origem = repository
-                .findByProfissionalIdAndDiaSemana(id, diaOrigem)
-                .orElseThrow(() -> new RuntimeException("Dia de origem não encontrado"));
-
-        ProfissionalDisponibilidade destino = repository
-                .findByProfissionalIdAndDiaSemana(id, diaDestino)
-                .orElse(new ProfissionalDisponibilidade());
-
+        ProfissionalDisponibilidade destino = new ProfissionalDisponibilidade();
         destino.setProfissional(origem.getProfissional());
         destino.setDiaSemana(diaDestino);
         destino.setHoraInicio(origem.getHoraInicio());

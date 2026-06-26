@@ -21,7 +21,10 @@ function generateNextDays(daysCount: number = 7) {
     const currentDate = new Date(today);
     currentDate.setDate(today.getDate() + i);
 
-    const dateString = currentDate.toISOString().split('T')[0];
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
 
     days.push({
       date: dateString,

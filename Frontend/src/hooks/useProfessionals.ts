@@ -46,6 +46,7 @@ export function useProfessionals() {
     phone: string;
     cpf: string;
     dataNascimento: string;
+    senha: string;
   }) => {
     await professionalService.createProfessional({
       nome: form.name,
@@ -53,7 +54,7 @@ export function useProfessionals() {
       dataNascimento: form.dataNascimento,
       telefone: form.phone,
       email: form.email,
-      senha: '123'
+      senha: form.senha,
     })
     
     // Atualiza a listagem local

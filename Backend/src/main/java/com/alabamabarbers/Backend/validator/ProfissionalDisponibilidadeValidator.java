@@ -6,7 +6,7 @@ import com.alabamabarbers.Backend.repository.ProfissionalDisponibilidadeReposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -15,22 +15,20 @@ public class ProfissionalDisponibilidadeValidator {
     private final ProfissionalDisponibilidadeRepository repository;
 
     public void validate(ProfissionalDisponibilidade disponibilidade) {
-        if (existsDisponibilidade(disponibilidade)) {
-            throw new DuplicateRecordException("Disponibilidade já cadastrada para esse dia");
+        List<ProfissionalDisponibilidade> existing = repository.findByProfissionalIdAndDiaSemana(
+                disponibilidade.getProfissional().getId(),
+                disponibilidade.getDiaSemana()
+        );
+
+        for (ProfissionalDisponibilidade block : existing) {
+            if (disponibilidade.getId() != null && disponibilidade.getId().equals(block.getId())) {
+                continue;
+            }
+            boolean overlaps = block.getHoraInicio().isBefore(disponibilidade.getHoraFim())
+                    && block.getHoraFim().isAfter(disponibilidade.getHoraInicio());
+            if (overlaps) {
+                throw new DuplicateRecordException("Bloco de horário conflita com outro já cadastrado para esse dia");
+            }
         }
-    }
-
-    private boolean existsDisponibilidade(ProfissionalDisponibilidade disponibilidade) {
-        Optional<ProfissionalDisponibilidade> found = repository
-                .findByProfissionalIdAndDiaSemana(
-                        disponibilidade.getProfissional().getId(),
-                        disponibilidade.getDiaSemana()
-                );
-
-        if (disponibilidade.getId() == null) {
-            return found.isPresent();
-        }
-
-        return found.isPresent() && !disponibilidade.getId().equals(found.get().getId());
     }
 }

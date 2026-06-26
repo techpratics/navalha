@@ -3,11 +3,26 @@ import { Bell, Moon, Sun, RefreshCw, LogOut, ChevronDown } from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
 import { useLogin } from '../../hooks/useLogin'
 
-interface HeaderProps {
-  userName?: string
+function getLoggedUserName(): string {
+  try {
+    const raw = localStorage.getItem('@Navalha:user')
+    if (raw) {
+      const user = JSON.parse(raw)
+      if (user.nome) return user.nome.split(' ')[0]
+    }
+    const token = localStorage.getItem('@Navalha:token')
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+      if (payload.sub) return payload.sub.split('@')[0]
+    }
+  } catch {
+    // ignore
+  }
+  return 'Usuário'
 }
 
-export default function Header({ userName = 'Carlos Silva' }: HeaderProps) {
+export default function Header() {
+  const userName = getLoggedUserName()
   const { isDark, toggleTheme } = useTheme()
   const { logout } = useLogin()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)

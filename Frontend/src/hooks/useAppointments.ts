@@ -2,6 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { scheduleService } from '../services/schedule.service';
 import type { Appointment } from '../types/appointment';
 
+function getInitials(name: string, fallback: string) {
+  if (!name) return fallback
+  const parts = name.trim().split(' ').filter(Boolean)
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
 export function useAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -13,16 +20,16 @@ export function useAppointments() {
     try {
       // Chama a API sem precisar passar IDs
       const response = await scheduleService.getClientAppointments();
-      
+
       // Mapeia o JSON retornado pelo backend para a interface do frontend
       const mappedAppointments: Appointment[] = (response || []).map((app: any) => ({
         id: app.id,
         professionalName: app.nomeProfissional || 'Profissional',
         professionalId: app.profissionalId || '',
-        professionalInitials: (app.nomeProfissional || 'PR').substring(0, 2).toUpperCase(),
-        clientName: app.nomeCliente || '',
+        professionalInitials: getInitials(app.nomeProfissional, 'PR'),
+        clientName: app.nomeCliente || 'Cliente',
         clientId: app.clienteId || '',
-        clientInitials: (app.nomeCliente || 'CL').substring(0, 2).toUpperCase(),
+        clientInitials: getInitials(app.nomeCliente, 'CL'),
         serviceName: app.nomeServico || 'Serviço',
         serviceId: app.servicoId || '',
         date: app.data,
@@ -100,7 +107,6 @@ export function useAppointments() {
     }
   };
 
-  // --- FUNÇÕES DE ENCAIXE/MOCK (HU-30) ---
   const checkAvailability = (date: string, time: string, durationMinutes: number, professionalName: string) => {
     return true; // Libera sempre provisoriamente
   };

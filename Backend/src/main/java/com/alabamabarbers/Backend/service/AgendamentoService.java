@@ -115,6 +115,10 @@ public class AgendamentoService {
         return agendamentoRepository.findAll();
     }
 
+    public List<Agendamento> findByClienteId(UUID clienteId) {
+        return agendamentoRepository.findByClienteId(clienteId);
+    }
+
     public Agendamento findById(UUID id) {
         return agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));

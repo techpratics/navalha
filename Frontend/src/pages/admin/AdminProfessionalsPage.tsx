@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react'
-import { Search, Scissors, Phone, Mail, UserX, UserCheck, Filter, AlertTriangle, Settings } from 'lucide-react'
+import { Search, Scissors, Phone, Mail, UserX, UserCheck, Filter, AlertTriangle, Settings, CalendarDays } from 'lucide-react'
 import AdminLayout from '../../components/layout/AdminLayout'
 import { useProfessionals } from '../../hooks/useProfessionals'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
 import type { Professional } from '../../types/professional'
 import ProfessionalServicesModal from '../../components/professionals/ProfessionalServicesModal'
+import ProfessionalAvailabilityModal from '../../components/professionals/ProfessionalAvailabilityModal'
 
 export default function AdminProfessionalsPage() {
   const { professionals, toggleProfessionalStatus } = useProfessionals()
@@ -13,6 +14,7 @@ export default function AdminProfessionalsPage() {
   const [showDeactivated, setShowDeactivated] = useState(false)
   const [confirmingStatus, setConfirmingStatus] = useState<Professional | null>(null)
   const [servicesModalProf, setServicesModalProf] = useState<Professional | null>(null)
+  const [availabilityModalProf, setAvailabilityModalProf] = useState<Professional | null>(null)
 
   const filteredProfessionals = useMemo(() => {
     return professionals.filter(prof => {
@@ -100,32 +102,36 @@ export default function AdminProfessionalsPage() {
                 </div>
               </div>
 
-              <div className="pt-2 flex gap-2">
-                <Button 
-                  onClick={() => setServicesModalProf(prof)}
-                  variant="secondary"
-                  className="flex-1"
-                  disabled={!prof.isActive}
-                >
-                  <Settings size={18} className="mr-2" />
-                  Serviços
-                </Button>
-
-                <Button 
+              <div className="pt-2 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setServicesModalProf(prof)}
+                    variant="secondary"
+                    className="flex-1"
+                    disabled={!prof.isActive}
+                  >
+                    <Settings size={16} className="mr-1.5" />
+                    Serviços
+                  </Button>
+                  <Button
+                    onClick={() => setAvailabilityModalProf(prof)}
+                    variant="secondary"
+                    className="flex-1"
+                    disabled={!prof.isActive}
+                  >
+                    <CalendarDays size={16} className="mr-1.5" />
+                    Horários
+                  </Button>
+                </div>
+                <Button
                   onClick={() => prof.isActive ? setConfirmingStatus(prof) : toggleProfessionalStatus(prof.id)}
-                  variant={prof.isActive ? 'secondary' : 'primary'} 
-                  className={`flex-1 ${prof.isActive ? 'hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50' : ''}`}
+                  variant={prof.isActive ? 'secondary' : 'primary'}
+                  className={`w-full ${prof.isActive ? 'hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50' : ''}`}
                 >
                   {prof.isActive ? (
-                    <>
-                      <UserX size={18} className="mr-2" />
-                      Desativar
-                    </>
+                    <><UserX size={18} className="mr-2" />Desativar</>
                   ) : (
-                    <>
-                      <UserCheck size={18} className="mr-2" />
-                      Reativar
-                    </>
+                    <><UserCheck size={18} className="mr-2" />Reativar</>
                   )}
                 </Button>
               </div>
@@ -175,11 +181,18 @@ export default function AdminProfessionalsPage() {
           </div>
         </div>
       )}
-      {/*Modal de Vínculo de Serviços */}
-      <ProfessionalServicesModal 
+      {/* Modal de Serviços */}
+      <ProfessionalServicesModal
         professional={servicesModalProf}
         isOpen={!!servicesModalProf}
         onClose={() => setServicesModalProf(null)}
+      />
+
+      {/* Modal de Horários */}
+      <ProfessionalAvailabilityModal
+        professional={availabilityModalProf}
+        isOpen={!!availabilityModalProf}
+        onClose={() => setAvailabilityModalProf(null)}
       />
     </AdminLayout>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Scissors, Calendar, PanelLeftClose, PanelLeftOpen, Users } from 'lucide-react'
+import { Calendar, PanelLeftClose, PanelLeftOpen, Users } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function ProfessionalSidebar() {
@@ -18,8 +18,8 @@ export default function ProfessionalSidebar() {
         className="flex items-center justify-between px-2 md:px-4 py-4 border-b"
       >
         <div className={`items-center gap-2 hidden md:flex ${collapsed ? 'md:hidden' : ''}`}>
-          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-            <Scissors size={14} className="text-black" />
+          <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <img src="/alabama_logo.jpeg" alt="Alabama Barbers" className="w-full h-full object-cover" />
           </div>
           <div>
             <p style={{ color: 'var(--text-primary)' }} className="text-sm font-bold leading-none">Navalha</p>

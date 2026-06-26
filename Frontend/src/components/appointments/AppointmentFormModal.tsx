@@ -1,6 +1,8 @@
-import { X, Calendar, Clock, User, Scissors, Briefcase } from 'lucide-react';
+import { X, User, Scissors, Briefcase } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import DateInput from '../ui/DateInput';
+import TimeInput from '../ui/TimeInput';
 import { useAppointmentForm } from '../../hooks/useAppointmentForm';
 import type { Appointment } from '../../types/appointment';
 
@@ -124,21 +126,15 @@ export default function AppointmentFormModal({ isOpen, onClose, onSuccess, resch
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Input 
-              label="Data" 
-              type="date" 
-              value={form.data} 
-              onChange={e => handleFieldChange('data', e.target.value)} 
-              required 
-              leftElement={<Calendar size={16} />} 
+            <DateInput
+              label="Data"
+              value={form.data}
+              onChange={iso => handleFieldChange('data', iso)}
             />
-            <Input 
-              label="Horário" 
-              type="time" 
-              value={form.horarioInicio} 
-              onChange={e => handleFieldChange('horarioInicio', e.target.value)} 
-              required 
-              leftElement={<Clock size={16} />} 
+            <TimeInput
+              label="Horário"
+              value={form.horarioInicio}
+              onChange={time => handleFieldChange('horarioInicio', time)}
             />
           </div>
 

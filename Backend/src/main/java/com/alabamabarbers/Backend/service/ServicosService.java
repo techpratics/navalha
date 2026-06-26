@@ -32,6 +32,10 @@ public class ServicosService {
         return servicosRepository.findByAtivoTrue();
     }
 
+    public List<Servicos> findAllAdmin() {
+        return servicosRepository.findAll();
+    }
+
     @Transactional
     public Servicos update(UUID id, Servicos servicos) {
         Servicos servicosToUpdate = findById(id);

@@ -1,119 +1,177 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { professionalService } from '../services/professional.service'
 
-export type DaySchedule = {
-  id: number 
-  name: string
-  active: boolean
+export type TimeBlock = {
+  dbId?: string
   start: string
   end: string
-  dbId?: string 
 }
 
-const defaultSchedule: DaySchedule[] = [
-  { id: 1, name: 'Segunda-feira', active: true, start: '09:00', end: '18:00' },
-  { id: 2, name: 'Terça-feira', active: true, start: '09:00', end: '18:00' },
-  { id: 3, name: 'Quarta-feira', active: true, start: '09:00', end: '18:00' },
-  { id: 4, name: 'Quinta-feira', active: true, start: '09:00', end: '18:00' },
-  { id: 5, name: 'Sexta-feira', active: true, start: '09:00', end: '18:00' },
-  { id: 6, name: 'Sábado', active: true, start: '09:00', end: '14:00' },
-  { id: 7, name: 'Domingo', active: false, start: '09:00', end: '12:00' },
-]
+export type DaySchedule = {
+  id: number
+  name: string
+  active: boolean
+  blocks: TimeBlock[]
+}
+
+const DAY_NAMES = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo']
+
+function buildDefaultSchedule(): DaySchedule[] {
+  return DAY_NAMES.map((name, i) => ({
+    id: i + 1,
+    name,
+    active: false,
+    blocks: [],
+  }))
+}
 
 export function useAvailability() {
-  const [schedule, setSchedule] = useState<DaySchedule[]>(defaultSchedule)
+  const [schedule, setSchedule] = useState<DaySchedule[]>(buildDefaultSchedule)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const pendingDeleteIds = useRef<string[]>([])
 
   const fetchAvailability = useCallback(async () => {
     try {
-      const data = await professionalService.getAvailability();
-      
-      if (data && data.length > 0) {
-        setSchedule(prev => prev.map(day => {
-          const diaBanco = data.find((d: any) => d.diaSemana === day.id);
-          
-          if (diaBanco) {
-            return { 
-              ...day, 
-              active: true, 
-              start: diaBanco.horaInicio.substring(0, 5),
-              end: diaBanco.horaFim.substring(0, 5),
-              dbId: diaBanco.id 
-            };
-          }
-          return { ...day, active: false, dbId: undefined };
-        }));
-      } else {
-         setSchedule(prev => prev.map(day => ({ ...day, active: false, dbId: undefined })));
+      const data = await professionalService.getAvailability()
+      const grouped = buildDefaultSchedule()
+      for (const d of data) {
+        const day = grouped.find(g => g.id === d.diaSemana)
+        if (day) {
+          day.active = true
+          day.blocks.push({
+            dbId: d.id,
+            start: d.horaInicio.substring(0, 5),
+            end: d.horaFim.substring(0, 5),
+          })
+        }
       }
-    } catch (error) {
-      console.error("Erro ao carregar horários", error);
+      // Sort blocks within each day by start time
+      grouped.forEach(day => day.blocks.sort((a, b) => a.start.localeCompare(b.start)))
+      setSchedule(grouped)
+      pendingDeleteIds.current = []
+    } catch {
+      setSchedule(buildDefaultSchedule())
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, []);
+  }, [])
 
-  useEffect(() => {
-    fetchAvailability();
-  }, [fetchAvailability]);
+  useEffect(() => { fetchAvailability() }, [fetchAvailability])
 
-  const updateDay = (id: number, field: keyof DaySchedule, value: string | boolean) => {
-    setSchedule(prev => 
-      prev.map(day => day.id === id ? { ...day, [field]: value } : day)
-    )
+  const toggleDay = (dayId: number, active: boolean) => {
+    if (!active) {
+      // Coleta IDs ANTES do updater para evitar duplicatas em Strict Mode
+      const day = schedule.find(d => d.id === dayId)
+      day?.blocks.forEach(b => {
+        if (b.dbId && !pendingDeleteIds.current.includes(b.dbId)) {
+          pendingDeleteIds.current = [...pendingDeleteIds.current, b.dbId]
+        }
+      })
+    }
+    setSchedule(prev => prev.map(day => {
+      if (day.id !== dayId) return day
+      if (!active) return { ...day, active: false, blocks: [] }
+      return { ...day, active: true, blocks: day.blocks.length > 0 ? day.blocks : [{ start: '09:00', end: '18:00' }] }
+    }))
   }
 
-  const copyToAll = (sourceDay: DaySchedule) => {
-    if (!confirm(`Deseja copiar o horário de ${sourceDay.start} às ${sourceDay.end} para todos os outros dias ativos?`)) return;
+  const addBlock = (dayId: number) => {
+    setSchedule(prev => prev.map(day => {
+      if (day.id !== dayId) return day
+      const last = day.blocks[day.blocks.length - 1]
+      const newStart = last?.end ?? '09:00'
+      const [h, m] = newStart.split(':').map(Number)
+      const endH = Math.min(h + 1, 23)
+      const newEnd = `${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      return { ...day, blocks: [...day.blocks, { start: newStart, end: newEnd }] }
+    }))
+  }
 
-    setSchedule(prev => 
-      prev.map(day => 
-        day.active ? { ...day, start: sourceDay.start, end: sourceDay.end } : day
-      )
-    )
+  const removeBlock = (dayId: number, blockIndex: number) => {
+    // Coleta o ID ANTES do updater para evitar duplicatas em Strict Mode
+    const day = schedule.find(d => d.id === dayId)
+    const block = day?.blocks[blockIndex]
+    if (block?.dbId && !pendingDeleteIds.current.includes(block.dbId)) {
+      pendingDeleteIds.current = [...pendingDeleteIds.current, block.dbId]
+    }
+    setSchedule(prev => prev.map(d => {
+      if (d.id !== dayId) return d
+      const newBlocks = d.blocks.filter((_, i) => i !== blockIndex)
+      return { ...d, blocks: newBlocks, active: newBlocks.length > 0 ? d.active : false }
+    }))
+  }
+
+  const updateBlock = (dayId: number, blockIndex: number, field: 'start' | 'end', value: string) => {
+    setSchedule(prev => prev.map(day => {
+      if (day.id !== dayId) return day
+      const newBlocks = day.blocks.map((b, i) => i === blockIndex ? { ...b, [field]: value } : b)
+      return { ...day, blocks: newBlocks }
+    }))
   }
 
   const handleSave = async () => {
-    setIsSaving(true);
-    setShowSuccess(false);
-    setErrorMsg(null);
-    
-    try {
-      const savePromises = schedule.map(day => {
-        const payload = {
-          diaSemana: day.id,
-          horaInicio: `${day.start}:00`,
-          horaFim: `${day.end}:00`
-        };
+    setIsSaving(true)
+    setShowSuccess(false)
+    setErrorMsg(null)
 
-        if (day.active) {
-          if (day.dbId) {
-            return professionalService.updateAvailabilityDay(day.dbId, payload); 
-          } else {
-            return professionalService.saveAvailabilityDay(payload); 
-          }
-        } else {
-          if (day.dbId) {
-            return professionalService.deleteAvailabilityDay(day.dbId); 
+    for (const day of schedule) {
+      if (!day.active) continue
+      for (const block of day.blocks) {
+        if (!block.start || !block.end) {
+          setErrorMsg(`Preencha todos os horários de ${day.name} antes de salvar.`)
+          setIsSaving(false)
+          return
+        }
+        if (block.end <= block.start) {
+          setErrorMsg(`Em ${day.name}: o horário de fim deve ser maior que o de início.`)
+          setIsSaving(false)
+          return
+        }
+      }
+    }
+
+    try {
+      // 1. DELETE primeiro — libera os blocos removidos antes de validar os novos
+      for (const id of pendingDeleteIds.current) {
+        await professionalService.deleteAvailabilityDay(id)
+      }
+
+      // 2. UPDATE blocos existentes — atualiza intervalos no banco antes de criar novos
+      for (const day of schedule) {
+        for (const block of day.blocks) {
+          if (block.dbId) {
+            await professionalService.updateAvailabilityDay(block.dbId, {
+              diaSemana: day.id,
+              horaInicio: `${block.start}:00`,
+              horaFim: `${block.end}:00`,
+            })
           }
         }
-        
-        return Promise.resolve(); 
-      });
+      }
 
-      await Promise.all(savePromises);
-      await fetchAvailability();
+      // 3. CREATE novos blocos — o validator já vê o estado final do banco
+      for (const day of schedule) {
+        for (const block of day.blocks) {
+          if (!block.dbId) {
+            await professionalService.saveAvailabilityDay({
+              diaSemana: day.id,
+              horaInicio: `${block.start}:00`,
+              horaFim: `${block.end}:00`,
+            })
+          }
+        }
+      }
 
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      await fetchAvailability()
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 3000)
     } catch (error: any) {
-      console.error('Erro ao salvar horários no backend', error);
-      setErrorMsg(error.response?.data?.erro || 'Erro ao salvar as configurações no servidor.');
+      setErrorMsg(error.response?.data?.erro || 'Erro ao salvar as configurações.')
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
   }
 
@@ -123,8 +181,10 @@ export function useAvailability() {
     isSaving,
     showSuccess,
     errorMsg,
-    updateDay,
-    copyToAll,
-    handleSave
+    toggleDay,
+    addBlock,
+    removeBlock,
+    updateBlock,
+    handleSave,
   }
 }

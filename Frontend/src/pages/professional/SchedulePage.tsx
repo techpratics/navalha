@@ -1,12 +1,15 @@
-import { useState } from 'react'
-import { Plus, X, Clock, User, Scissors, AlertCircle, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, X, User, Scissors, AlertCircle, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import TimeInput from '../../components/ui/TimeInput'
 import ProfessionalLayout from '../../components/layout/ProfessionalLayout'
 import AppointmentList from '../../components/appointments/AppointmentList'
 import { useAppointments } from '../../hooks/useAppointments'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
+import { clientService } from '../../services/client.service'
+import { catalogService } from '../../services/catalog.service'
+import { api } from '../../services/api'
 
-// Função utilitária para pegar a data de hoje no formato YYYY-MM-DD corrigindo fuso horário
 function getTodayString() {
   const today = new Date()
   const year = today.getFullYear()
@@ -15,7 +18,6 @@ function getTodayString() {
   return `${year}-${month}-${day}`
 }
 
-// Função para formatar a data por extenso na tela (Ex: 14 de junho de 2026)
 function formatDisplayDate(dateStr: string) {
   const [year, month, day] = dateStr.split('-')
   const date = new Date(Number(year), Number(month) - 1, Number(day))
@@ -23,33 +25,37 @@ function formatDisplayDate(dateStr: string) {
 }
 
 export default function SchedulePage() {
-  const { appointments, addAppointment, checkAvailability, completeAppointment } = useAppointments()
+  const { appointments, fetchAppointments, completeAppointment } = useAppointments()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  // 1. DATA DINÂMICA: Começa sempre com o dia de hoje real do PC
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString())
 
-  // Simulação de profissional logado (Kaua)
-  const loggedInProfessionalName = 'Kaua'
-  const loggedInProfessionalInitials = 'KA'
+  const [clientOptions, setClientOptions] = useState<any[]>([])
+  const [serviceOptions, setServiceOptions] = useState<any[]>([])
 
   const [form, setForm] = useState({
-    clientName: '',
-    serviceName: '',
+    clienteId: '',
+    servicoId: '',
     time: '',
-    duration: '45',
-    price: '40.00'
   })
 
-  // 2. FILTRAGEM DINÂMICA: Filtra usando o estado da selectedDate
-  const dailySchedule = appointments.filter(
-    app => app.professionalName.toLowerCase() === loggedInProfessionalName.toLowerCase() && app.date === selectedDate
-  )
+  useEffect(() => {
+    Promise.all([
+      clientService.getClients(),
+      catalogService.getServices()
+    ]).then(([clients, services]) => {
+      setClientOptions(clients)
+      setServiceOptions(services)
+    }).catch(console.error)
+  }, [])
 
-  // 3. FUNÇÕES DE NAVEGAÇÃO: Soma ou subtrai 1 dia da data atual
+  // Filtra apenas por data — o backend já retorna somente os agendamentos do profissional logado
+  const dailySchedule = appointments.filter(app => app.date === selectedDate)
+
   function handlePreviousDay() {
-    const date = new Date(selectedDate + 'T00:00:00') // Evita quebra de fuso
+    const date = new Date(selectedDate + 'T00:00:00')
     date.setDate(date.getDate() - 1)
     setSelectedDate(date.toISOString().split('T')[0])
   }
@@ -64,66 +70,57 @@ export default function SchedulePage() {
     setSelectedDate(getTodayString())
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
 
-    if (!form.clientName || !form.serviceName || !form.time) {
-      setError('Preencha os campos obrigatórios')
+    if (!form.clienteId || !form.servicoId || !form.time) {
+      setError('Preencha todos os campos obrigatórios')
       return
     }
 
-    if (checkAvailability) {
-      const isAvailable = checkAvailability(selectedDate, form.time, Number(form.duration), loggedInProfessionalName)
-      if (!isAvailable) {
-        setError('Horário indisponível ou em conflito com outro agendamento')
-        return
-      }
-    }
-
-    if (addAppointment) {
-      addAppointment({
-        professionalName: loggedInProfessionalName,
-        professionalInitials: loggedInProfessionalInitials,
-        clientName: form.clientName,
-        clientInitials: form.clientName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2),
-        serviceName: form.serviceName,
-        date: selectedDate, // Usa a data que está aberta na tela
-        time: form.time,
-        durationMinutes: Number(form.duration),
-        priceInCents: Math.round(Number(form.price) * 100),
-        status: 'confirmed'
+    setSubmitting(true)
+    try {
+      await api.post('/agendamentos/encaixe', {
+        profissionalId: '00000000-0000-0000-0000-000000000000',
+        clienteId: form.clienteId,
+        servicoId: form.servicoId,
+        data: selectedDate,
+        horarioInicio: form.time,
       })
+      setIsModalOpen(false)
+      setForm({ clienteId: '', servicoId: '', time: '' })
+      await fetchAppointments()
+    } catch (err: any) {
+      const msg = err.response?.data?.erro || err.response?.data?.message || 'Erro ao criar encaixe.'
+      setError(msg)
+    } finally {
+      setSubmitting(false)
     }
-
-    setIsModalOpen(false)
-    setForm({ clientName: '', serviceName: '', time: '', duration: '45', price: '40.00' })
   }
 
   return (
     <ProfessionalLayout>
       <div className="max-w-2xl mx-auto">
-        
-        {/* CABEÇALHO COM CONTROLES DE DATA */}
+
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 style={{ color: 'var(--text-primary)' }} className="text-2xl font-bold mb-1">Minha Agenda</h1>
-            
-            {/* Barra de Navegação de Dias */}
+
             <div className="flex items-center gap-2 mt-2">
-              <button 
+              <button
                 onClick={handlePreviousDay}
                 style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)', borderColor: 'var(--border)' }}
                 className="p-1.5 rounded-lg border hover:opacity-80 transition-opacity"
               >
                 <ChevronLeft size={16} />
               </button>
-              
+
               <span style={{ color: 'var(--text-primary)' }} className="text-sm font-semibold min-w-[180px] text-center capitalize">
                 {formatDisplayDate(selectedDate)}
               </span>
 
-              <button 
+              <button
                 onClick={handleNextDay}
                 style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)', borderColor: 'var(--border)' }}
                 className="p-1.5 rounded-lg border hover:opacity-80 transition-opacity"
@@ -131,7 +128,6 @@ export default function SchedulePage() {
                 <ChevronRight size={16} />
               </button>
 
-              {/* Botão Atalho para voltar para o "Hoje" */}
               {selectedDate !== getTodayString() && (
                 <button
                   onClick={handleGoToToday}
@@ -147,7 +143,6 @@ export default function SchedulePage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {/* Resumo do dia */}
           <div
             style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
             className="p-4 rounded-2xl border flex items-center justify-around text-center"
@@ -172,11 +167,10 @@ export default function SchedulePage() {
             </div>
           </div>
 
-          {/* Botão Novo Encaixe */}
           <button
             onClick={() => setIsModalOpen(true)}
-            style={{ 
-              backgroundColor: 'rgba(245, 158, 11, 0.1)', 
+            style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
               borderColor: 'var(--brand)',
               color: 'var(--brand)'
             }}
@@ -186,44 +180,85 @@ export default function SchedulePage() {
             Novo Encaixe
           </button>
 
-          {/* Listagem dos cartões */}
           {dailySchedule.length === 0 ? (
             <div className="text-center py-12 border border-[var(--border)] border-dashed rounded-2xl" style={{ color: 'var(--text-muted)' }}>
               Nenhum compromisso agendado para este dia.
             </div>
           ) : (
-            <AppointmentList 
-              appointments={dailySchedule} 
-              view="professional" 
-              onComplete={completeAppointment} // <-- ADICIONAMOS ISSO AQUI
+            <AppointmentList
+              appointments={dailySchedule}
+              view="professional"
+              onComplete={completeAppointment}
             />
           )}
         </div>
       </div>
 
-      {/* Modal de Encaixe Rápido */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }} className="w-full max-w-lg rounded-3xl border shadow-2xl p-6 md:p-8 animate-in slide-in-from-bottom-4 duration-300">
             <div className="flex items-center justify-between mb-6">
               <h2 style={{ color: 'var(--text-primary)' }} className="text-xl font-bold">Novo Encaixe</h2>
-              <button onClick={() => { setIsModalOpen(false); setError(null); }} style={{ color: 'var(--text-muted)' }} className="hover:opacity-70 transition-opacity">
+              <button onClick={() => { setIsModalOpen(false); setError(null) }} style={{ color: 'var(--text-muted)' }} className="hover:opacity-70 transition-opacity">
                 <X size={24} />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input label="Nome do Cliente" placeholder="Ex: Pedro Santos" value={form.clientName} onChange={e => setForm({ ...form, clientName: e.target.value })} leftElement={<User size={16} style={{ color: 'var(--text-muted)' }} />} />
-              <Input label="Serviço" placeholder="Ex: Corte e Barba" value={form.serviceName} onChange={e => setForm({ ...form, serviceName: e.target.value })} leftElement={<Scissors size={16} style={{ color: 'var(--text-muted)' }} />} />
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Horário" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} leftElement={<Clock size={16} style={{ color: 'var(--text-muted)' }} />} />
-                <Input label="Duração (min)" type="number" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} />
+
+              <div>
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium mb-1">
+                  <User size={14} className="inline mr-1" />
+                  Cliente
+                </label>
+                <select
+                  value={form.clienteId}
+                  onChange={e => setForm({ ...form, clienteId: e.target.value })}
+                  style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                  className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-[var(--brand)]"
+                >
+                  <option value="">Selecione um cliente...</option>
+                  {clientOptions.map((c: any) => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </select>
               </div>
+
+              <div>
+                <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium mb-1">
+                  <Scissors size={14} className="inline mr-1" />
+                  Serviço
+                </label>
+                <select
+                  value={form.servicoId}
+                  onChange={e => setForm({ ...form, servicoId: e.target.value })}
+                  style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                  className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-[var(--brand)]"
+                >
+                  <option value="">Selecione um serviço...</option>
+                  {serviceOptions.map((s: any) => (
+                    <option key={s.id} value={s.id}>{s.nome} ({s.duracaoMinutos} min)</option>
+                  ))}
+                </select>
+              </div>
+
+              <TimeInput
+                label="Horário"
+                value={form.time}
+                onChange={time => setForm({ ...form, time })}
+              />
+
               {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 text-red-500 text-sm border border-red-500/20"><AlertCircle size={16} />{error}</div>
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 text-red-500 text-sm border border-red-500/20">
+                  <AlertCircle size={16} />
+                  {error}
+                </div>
               )}
+
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="secondary" onClick={() => { setIsModalOpen(false); setError(null); }} className="flex-1">Cancelar</Button>
-                <Button type="submit" variant="primary" className="flex-1">Confirmar Encaixe</Button>
+                <Button type="button" variant="secondary" onClick={() => { setIsModalOpen(false); setError(null) }} className="flex-1">Cancelar</Button>
+                <Button type="submit" variant="primary" className="flex-1" disabled={submitting}>
+                  {submitting ? 'Confirmando...' : 'Confirmar Encaixe'}
+                </Button>
               </div>
             </form>
           </div>

@@ -37,11 +37,16 @@ export default function AppointmentList({ appointments, view, onCancel, onComple
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-lg">
-                  {app.professionalInitials}
+                  {view === 'professional' ? app.clientInitials : app.professionalInitials}
                 </div>
                 <div>
+                  {view === 'professional' && (
+                    <p style={{ color: 'var(--text-muted)' }} className="text-[10px] uppercase font-bold tracking-wider mb-0.5">
+                      Cliente
+                    </p>
+                  )}
                   <p style={{ color: 'var(--text-primary)' }} className="font-semibold">
-                    {app.professionalName}
+                    {view === 'professional' ? app.clientName : app.professionalName}
                   </p>
                   <p style={{ color: 'var(--text-secondary)' }} className="text-sm flex items-center gap-1">
                     <Scissors size={14} />

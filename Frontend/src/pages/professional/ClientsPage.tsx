@@ -78,7 +78,7 @@ export default function ClientsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>Última visita: {new Date(client.lastVisit).toLocaleDateString('pt-BR')}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Última visita: {client.lastVisit ? new Date(client.lastVisit).toLocaleDateString('pt-BR') : '—'}</span>
                   </div>
                 </div>
               </div>

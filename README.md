@@ -31,7 +31,7 @@
 
 ## 📖 Sobre o Projeto
 
-O **Navalha** é um sistema web robusto desenvolvido para o gerenciamento inteligente de barbearias e salões. Com foco na autonomia do cliente e na organização do profissional, a plataforma elimina processos manuais e centraliza toda a rotina de agendamentos em um ecossistema digital.
+O **Navalha** é um sistema web desenvolvido para o gerenciamento de barbearias e salões. A plataforma centraliza o fluxo de agendamentos em três perfis distintos — Cliente, Profissional e Administrador — cada um com seu painel dedicado e regras de acesso próprias.
 
 ---
 
@@ -40,39 +40,47 @@ O **Navalha** é um sistema web robusto desenvolvido para o gerenciamento inteli
 Muitos profissionais da área de estética ainda dependem de anotações em papel ou trocas intermináveis de mensagens no WhatsApp para agendar clientes. Isso gera:
 - Conflitos e sobreposições de horários.
 - Furos na agenda por cancelamentos de última hora.
-- Perda de histórico de preferências dos clientes.
+- Perda de histórico de atendimentos dos clientes.
 
-O **Navalha** resolve isso automatizando a exibição de disponibilidade, aplicando regras de negócio inteligentes (como prazo mínimo para cancelamentos) e fornecendo um painel administrativo claro para o dia a dia do profissional.
+O **Navalha** resolve isso automatizando a exibição de disponibilidade, aplicando regras de negócio inteligentes (como prazo mínimo de 2 horas para cancelamentos) e fornecendo painéis específicos para cada tipo de usuário.
 
 ---
 
 ## ✨ Principais Funcionalidades
 
-O sistema foi arquitetado em dois módulos principais para garantir uma experiência personalizada para cada tipo de usuário:
+O sistema é dividido em três módulos, um para cada perfil de usuário:
 
 ### 👤 Módulo do Cliente
-- **Autoagendamento:** Escolha de serviços, profissional e horários disponíveis em tempo real.
-- **Painel de Controle:** Visualização de agendamentos futuros e passados.
-- **Gestão de Compromissos:** Cancelamento autônomo de horários (com regra de antecedência mínima de 2 horas).
-- **Notificações Visuais:** Contadores e alertas de status.
+- **Agendamento em 4 etapas:** Escolha do serviço → seleção de profissional, data e horário disponível → confirmação → tela de sucesso.
+- **Horários inteligentes:** O sistema cruza a duração do serviço com a grade de disponibilidade do profissional e exibe apenas os slots possíveis.
+- **Meus Agendamentos:** Visualização de todos os agendamentos com status (Pendente, Confirmado, Concluído, Cancelado).
+- **Cancelamento autônomo:** Regra de antecedência mínima de 2 horas para cancelamento.
 
 ### ✂️ Módulo do Profissional
-- **Gestão de Disponibilidade:** Configuração de dias úteis e blocos de horários de trabalho, com funcionalidade de replicação rápida para a semana.
-- **Agenda Diária Dinâmica:** Painel focado no dia atual com métricas de atendimentos (Total, Confirmados, Pendentes).
-- **Controle de Fluxo:** Ações de mudança de status (Confirmar, Cancelar, Concluir Atendimento).
-- **Encaixes Rápidos:** Criação de agendamentos manuais (walk-ins) diretamente pelo painel para clientes sem cadastro prévio.
-- **Base de Clientes:** Listagem e filtro de clientes frequentes para ações de fidelização.
+- **Agenda Diária:** Navegação por data com listagem dos atendimentos do dia e métricas de status.
+- **Controle de status:** Marcar atendimentos como Concluído diretamente pela agenda.
+- **Encaixe rápido:** Criação manual de agendamento (walk-in) para clientes cadastrados no sistema, sem necessidade de reserva prévia pelo app.
+- **Disponibilidade:** Configuração de blocos de horário por dia da semana, com opção de copiar a grade de um dia para outro.
+- **Base de Clientes:** Listagem e busca de clientes atendidos, ordenados por frequência.
+
+### 🛡️ Módulo do Administrador
+- **Gestão de Clientes:** Listagem, busca, edição de dados, ativação/desativação e consulta do histórico completo de atendimentos por cliente.
+- **Planos de Assinatura:** Criação de planos e atribuição a clientes.
+- **Gestão de Profissionais:** Cadastro, edição, gerenciamento dos serviços ofertados por cada profissional, configuração de disponibilidade e ativação/desativação.
+- **Agenda Global:** Visualização de todos os agendamentos nos modos Dia e Semana, com criação manual de agendamentos.
+- **Agenda por Profissional:** Visualização da agenda individual de cada profissional.
+- **Gestão de Serviços:** CRUD completo de serviços (nome, preço, duração), com ativação/desativação.
+- **Relatórios:** Distribuição de clientes por plano de assinatura, desempenho dos profissionais e serviços mais realizados.
 
 ---
 
 ## 🔄 Fluxo do Sistema
 
-O fluxo de funcionamento foi desenhado para ser fluido e intuitivo:
-
-1. **Setup Inicial:** O Profissional acessa o sistema e cadastra sua grade de horários semanais.
-2. **Reserva:** O Cliente faz login, escolhe o serviço e o sistema cruza o tempo do serviço com a grade livre do profissional para exibir apenas os horários possíveis.
-3. **Confirmação:** Ao confirmar, o horário é bloqueado e o status fica como "Confirmado" no banco de dados.
-4. **Execução:** No dia marcado, o Cliente comparece. Ao finalizar o corte, o Profissional acessa a Agenda Diária e marca o atendimento como "Concluído", limpando o painel e alimentando o histórico financeiro/gerencial.
+1. **Setup:** O Administrador cadastra os profissionais, os serviços disponíveis e os planos de assinatura.
+2. **Disponibilidade:** Cada Profissional acessa seu painel e configura sua grade de horários semanais.
+3. **Agendamento:** O Cliente faz login, percorre as 4 etapas de reserva e confirma o horário.
+4. **Execução:** No dia marcado, o Profissional visualiza sua agenda e marca o atendimento como "Concluído" ao finalizar.
+5. **Gestão:** O Administrador acompanha relatórios, histórico de clientes e a agenda global em tempo real.
 
 ---
 
@@ -89,7 +97,7 @@ O projeto adota uma arquitetura baseada em API RESTful, separando completamente 
 ### ⚙️ Backend
 - **Java + Spring Boot:** Escolhido pela robustez, escalabilidade e facilidade na construção de APIs de nível corporativo. O ecossistema Spring permite implementações rápidas de segurança, injeção de dependências e mapeamento de banco de dados.
 - **PostgreSQL:** Banco de dados relacional utilizado para persistência dos dados de agendamentos, usuários e disponibilidade dos profissionais.
-- **Autenticação JWT (JSON Web Token):** O sistema utiliza tokens encodados em Base64 para garantir a identidade do usuário (Cliente ou Profissional) e proteger rotas sensíveis (ex: `@Navalha:token`).
+- **Autenticação JWT (JSON Web Token):** O sistema utiliza tokens encodados em Base64 para garantir a identidade do usuário (Cliente, Profissional ou Admin) e proteger rotas sensíveis (ex: `@Navalha:token`).
 
 ---
 
@@ -108,11 +116,13 @@ Suba o banco de dados e a API com Docker:
 
 ```bash
 cd Backend
-docker-compose up -d
+docker compose up --build
 ```
 
 A API estará disponível em `http://localhost:8080`.
 A documentação Swagger estará em `http://localhost:8080/swagger-ui.html`.
+
+[Manual para Rodar Backend](./Backend/RunBackend.md)
 
 ---
 
@@ -132,6 +142,8 @@ pnpm dev
 ```
 
 O frontend estará disponível em `http://localhost:5173`.
+
+[Documentação do Frontend](./Frontend/README.md)
 
 ---
 

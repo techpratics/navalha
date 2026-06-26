@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Scissors, UserPlus, Users, PanelLeftClose, PanelLeftOpen, Briefcase, Calendar } from 'lucide-react'
+import { Scissors, UserPlus, Users, PanelLeftClose, PanelLeftOpen, Briefcase, Calendar, BarChart3, Tag } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function AdminSidebar() {
@@ -14,6 +14,8 @@ export default function AdminSidebar() {
     { path: '/admin/clientes', label: 'Clientes', icon: Users },
     { path: '/admin/cadastro-profissional', label: 'Cadastrar Profissional', icon: Briefcase },
     { path: '/admin/profissionais', label: 'Profissionais', icon: Scissors },
+    { path: '/admin/servicos', label: 'Serviços', icon: Tag },
+    { path: '/admin/relatorios', label: 'Relatórios', icon: BarChart3 },
   ]
 
   return (
@@ -26,8 +28,8 @@ export default function AdminSidebar() {
         className="flex items-center justify-between px-2 md:px-4 py-4 border-b"
       >
         <div className={`items-center gap-2 hidden md:flex ${collapsed ? 'md:hidden' : ''}`}>
-          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-            <Scissors size={14} className="text-black" />
+          <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <img src="/alabama_logo.jpeg" alt="Alabama Barbers" className="w-full h-full object-cover" />
           </div>
           <div>
             <p style={{ color: 'var(--text-primary)' }} className="text-sm font-bold leading-none">Navalha</p>

@@ -3,6 +3,8 @@ import AdminLayout from '../../components/layout/AdminLayout'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
 import { UserPlus, CheckCircle2 } from 'lucide-react'
+import { clientService } from '../../services/client.service'
+import DateInput from '../../components/ui/DateInput'
 
 export default function ClientRegistrationPage() {
   const [form, setForm] = useState({
@@ -10,6 +12,8 @@ export default function ClientRegistrationPage() {
     phone: '',
     email: '',
     cpf: '',
+    dataNascimento: '',
+    senha: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -21,24 +25,35 @@ export default function ClientRegistrationPage() {
     if (!form.phone) newErrors.phone = 'Telefone é obrigatório'
     if (!form.email) newErrors.email = 'Email é obrigatório'
     if (!form.cpf) newErrors.cpf = 'CPF é obrigatório'
-    
+    if (!form.dataNascimento) newErrors.dataNascimento = 'Data de nascimento é obrigatória'
+    if (!form.senha) newErrors.senha = 'Senha é obrigatória'
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
 
     setLoading(true)
-    // Simulação de salvamento
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      await clientService.createClient({
+        nome: form.name,
+        telefone: form.phone,
+        dataNascimento: form.dataNascimento,
+        cpf: form.cpf,
+        email: form.email,
+        senha: form.senha,
+      })
       setSuccess(true)
-      setForm({ name: '', phone: '', email: '', cpf: '' })
-      
-      setTimeout(() => setSuccess(false), 3000)
-    }, 1000)
+      setForm({ name: '', phone: '', email: '', cpf: '', dataNascimento: '', senha: '' })
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.data?.erro || 'Erro ao realizar o cadastro.'
+      alert(msg)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -80,7 +95,7 @@ export default function ClientRegistrationPage() {
                     error={errors.name}
                   />
                 </div>
-                
+
                 <Input
                   label="CPF"
                   placeholder="000.000.000-00"
@@ -107,6 +122,22 @@ export default function ClientRegistrationPage() {
                     error={errors.email}
                   />
                 </div>
+
+                <DateInput
+                  label="Data de Nascimento"
+                  value={form.dataNascimento}
+                  onChange={iso => setForm(f => ({ ...f, dataNascimento: iso }))}
+                  error={errors.dataNascimento}
+                />
+
+                <Input
+                  label="Senha"
+                  type="password"
+                  placeholder="Senha de acesso do cliente"
+                  value={form.senha}
+                  onChange={e => setForm(f => ({ ...f, senha: e.target.value }))}
+                  error={errors.senha}
+                />
               </div>
 
               <div className="pt-4">

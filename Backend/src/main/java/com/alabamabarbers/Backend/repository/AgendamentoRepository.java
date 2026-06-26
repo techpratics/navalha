@@ -35,4 +35,10 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, UUID> 
             @Param("inicio") LocalTime inicio,
             @Param("fim") LocalTime fim
     );
+
+    List<Agendamento> findByDataBetween(LocalDate dataInicio, LocalDate dataFim);
+
+    List<Agendamento> findByDataBetweenAndStatus(LocalDate dataInicio, LocalDate dataFim, StatusAgendamento status);
+
+    int countByClienteIdAndDataBetweenAndStatusNot(UUID clienteId, LocalDate dataInicio, LocalDate dataFim, StatusAgendamento status);
 }

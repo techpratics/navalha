@@ -1,78 +1,85 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Client } from '../types/client'
+import { clientService } from '../services/client.service'
 
-const mockClients: Client[] = [
-  {
-    id: '1',
-    name: 'João Oliveira',
-    initials: 'JO',
-    phone: '(11) 98888-7777',
-    email: 'joao@email.com',
-    cpf: '123.456.789-00',
-    isActive: true,
-    totalAppointments: 15,
-    lastVisit: '2026-05-20',
-  },
-  {
-    id: '2',
-    name: 'Ricardo Santos',
-    initials: 'RS',
-    phone: '(11) 97777-6666',
-    email: 'ricardo@email.com',
-    cpf: '234.567.890-11',
-    isActive: true,
-    totalAppointments: 8,
-    lastVisit: '2026-05-25',
-  },
-  {
-    id: '3',
-    name: 'Marcos Souza',
-    initials: 'MS',
-    phone: '(11) 96666-5555',
-    email: 'marcos@email.com',
-    cpf: '345.678.901-22',
-    isActive: true,
-    totalAppointments: 3,
-    lastVisit: '2026-05-15',
-  },
-  {
-    id: '4',
-    name: 'Paulo Lima',
-    initials: 'PL',
-    phone: '(11) 95555-4444',
-    email: 'paulo@email.com',
-    cpf: '456.789.012-33',
-    isActive: true,
-    totalAppointments: 12,
-    lastVisit: '2026-05-28',
-  },
-  {
-    id: '5',
-    name: 'Felipe Neves',
-    initials: 'FN',
-    phone: '(11) 94444-3333',
-    email: 'felipe@email.com',
-    cpf: '567.890.123-44',
-    isActive: false,
-    totalAppointments: 1,
-    lastVisit: '2026-04-10',
-  },
-]
+const getInitials = (name: string) => {
+  if (!name) return '??'
+  const parts = name.trim().split(' ')
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
 
 export function useClients() {
-  const [clients, setClients] = useState<Client[]>(mockClients)
+  const [clients, setClients] = useState<Client[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const updateClient = (id: string, updatedData: Partial<Client>) => {
-    setClients(prev => prev.map(client => 
-      client.id === id ? { ...client, ...updatedData } : client
-    ))
+  async function loadClients() {
+    setLoading(true)
+    setError(null)
+    try {
+      const [clientResult, statsResult] = await Promise.allSettled([
+        clientService.getClients(),
+        clientService.getFrequentStats()
+      ])
+
+      const rawClients = clientResult.status === 'fulfilled' ? clientResult.value : []
+      const stats: any[] = statsResult.status === 'fulfilled' ? statsResult.value : []
+
+      const statsMap: Record<string, any> = {}
+      stats.forEach(s => { statsMap[s.clienteId] = s })
+
+      const mapped: Client[] = rawClients.map((item: any) => {
+        const stat = statsMap[item.id]
+        return {
+          id: item.id,
+          name: item.nome,
+          initials: getInitials(item.nome),
+          phone: item.telefone,
+          email: item.email || '',
+          cpf: item.cpf,
+          isActive: item.status,
+          totalAppointments: stat?.totalAtendimentos ?? 0,
+          lastVisit: stat?.ultimoAtendimento ?? ''
+        }
+      })
+
+      setClients(mapped)
+    } catch (err) {
+      console.error(err)
+      setError('Falha ao carregar clientes.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const toggleClientStatus = (id: string) => {
-    setClients(prev => prev.map(client => 
-      client.id === id ? { ...client, isActive: !client.isActive } : client
-    ))
+  useEffect(() => {
+    loadClients()
+  }, [])
+
+  const updateClient = async (id: string, updatedData: Partial<Client>) => {
+    try {
+      await clientService.updateClient(id, updatedData.name || '', updatedData.phone || '')
+      setClients(prev => prev.map(client =>
+        client.id === id ? { ...client, ...updatedData } : client
+      ))
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao atualizar cliente.')
+    }
   }
 
-  return { clients, updateClient, toggleClientStatus }
+  const toggleClientStatus = async (id: string) => {
+    try {
+      await clientService.toggleStatus(id)
+      setClients(prev => prev.map(client =>
+        client.id === id ? { ...client, isActive: !client.isActive } : client
+      ))
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao alterar status do cliente.')
+    }
+  }
+
+  return { clients, loading, error, updateClient, toggleClientStatus }
 }

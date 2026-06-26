@@ -2,8 +2,9 @@ import { useState } from 'react'
 import AdminLayout from '../../components/layout/AdminLayout'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
-import { UserCheck, CheckCircle2, Calendar } from 'lucide-react'
+import { UserCheck, CheckCircle2, Lock } from 'lucide-react'
 import { useProfessionals } from '../../hooks/useProfessionals'
+import DateInput from '../../components/ui/DateInput'
 
 export default function ProfessionalRegistrationPage() {
   const { addProfessional } = useProfessionals()
@@ -12,7 +13,8 @@ export default function ProfessionalRegistrationPage() {
     email: '',
     phone: '',
     cpf: '',
-    dataNascimento: '2000-01-01',
+    dataNascimento: '',
+    senha: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -25,7 +27,8 @@ export default function ProfessionalRegistrationPage() {
     if (!form.phone) newErrors.phone = 'Telefone é obrigatório'
     if (!form.cpf) newErrors.cpf = 'CPF é obrigatório'
     if (!form.dataNascimento) newErrors.dataNascimento = 'Data de nascimento é obrigatória'
-    
+    if (!form.senha) newErrors.senha = 'Senha é obrigatória'
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -38,10 +41,11 @@ export default function ProfessionalRegistrationPage() {
     try {
       await addProfessional(form)
       setSuccess(true)
-      setForm({ name: '', email: '', phone: '', cpf: '', dataNascimento: '2000-01-01' })
-    } catch (err) {
+      setForm({ name: '', email: '', phone: '', cpf: '', dataNascimento: '', senha: '' })
+    } catch (err: any) {
       console.error(err)
-      alert('Erro ao realizar o cadastro.')
+      const msg = err.response?.data?.message || err.response?.data?.erro || 'Erro ao realizar o cadastro.'
+      alert(msg)
     } finally {
       setLoading(false)
     }
@@ -83,7 +87,7 @@ export default function ProfessionalRegistrationPage() {
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 error={errors.name}
               />
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <Input
                   label="E-mail"
@@ -110,15 +114,23 @@ export default function ProfessionalRegistrationPage() {
                   onChange={e => setForm(f => ({ ...f, cpf: e.target.value }))}
                   error={errors.cpf}
                 />
-                <Input
+                <DateInput
                   label="Data de Nascimento"
-                  type="date"
                   value={form.dataNascimento}
-                  onChange={e => setForm(f => ({ ...f, dataNascimento: e.target.value }))}
+                  onChange={iso => setForm(f => ({ ...f, dataNascimento: iso }))}
                   error={errors.dataNascimento}
-                  leftElement={<Calendar size={16} style={{ color: 'var(--text-muted)' }} />}
                 />
               </div>
+
+              <Input
+                label="Senha de Acesso"
+                type="password"
+                placeholder="Senha que o profissional usará para entrar no sistema"
+                value={form.senha}
+                onChange={e => setForm(f => ({ ...f, senha: e.target.value }))}
+                error={errors.senha}
+                leftElement={<Lock size={16} style={{ color: 'var(--text-muted)' }} />}
+              />
 
               <div className="pt-4">
                 <Button type="submit" variant="primary" className="w-full" disabled={loading}>

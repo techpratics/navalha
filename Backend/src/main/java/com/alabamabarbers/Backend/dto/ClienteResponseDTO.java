@@ -9,5 +9,6 @@ public record ClienteResponseDTO(
         String cpf,
         LocalDate dataNascimento,
         String telefone,
-        boolean status
+        boolean status,
+        String email
 ) {}

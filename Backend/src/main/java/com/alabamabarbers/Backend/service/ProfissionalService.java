@@ -59,29 +59,39 @@ public class ProfissionalService {
         int duracao = servicos.getDuracaoMinutos();
 
         int diaSemana = data.getDayOfWeek().getValue();
-        ProfissionalDisponibilidade disp = disponibilidadeRepository
-                .findByProfissionalIdAndDiaSemana(id, diaSemana)
-                .orElseThrow(() -> new RuntimeException("Profissional não atende nesse dia"));
+        List<ProfissionalDisponibilidade> blocos = disponibilidadeRepository
+                .findByProfissionalIdAndDiaSemana(id, diaSemana);
 
-        List<LocalTime> slots = new ArrayList<>();
-        LocalTime slot = disp.getHoraInicio();
-        while (!slot.plusMinutes(duracao).isAfter(disp.getHoraFim())) {
-            slots.add(slot);
-            slot = slot.plusMinutes(duracao);
+        if (blocos.isEmpty()) {
+            throw new RuntimeException("Profissional não atende nesse dia");
         }
 
-        List<StatusAgendamento> status = List.of(
+        // Gera slots para cada bloco de horário do dia
+        List<LocalTime> slots = new ArrayList<>();
+        for (ProfissionalDisponibilidade bloco : blocos) {
+            LocalTime slot = bloco.getHoraInicio();
+            while (!slot.plusMinutes(duracao).isAfter(bloco.getHoraFim())) {
+                slots.add(slot);
+                slot = slot.plusMinutes(duracao);
+            }
+        }
+
+        List<StatusAgendamento> statusIgnorados = List.of(
                 StatusAgendamento.CANCELADO,
                 StatusAgendamento.NAO_COMPARECEU
         );
 
         List<Agendamento> agendamentos = agendamentoRepository
-                .findByProfissionalIdAndDataAndStatusNotIn(id, data, status);
+                .findByProfissionalIdAndDataAndStatusNotIn(id, data, statusIgnorados);
+
+        LocalTime agora = LocalTime.now();
 
         return slots.stream()
                 .filter(s -> agendamentos.stream().noneMatch(a ->
                         s.isBefore(a.getHorarioFim()) && s.plusMinutes(duracao).isAfter(a.getHorarioInicio())
                 ))
+                .filter(s -> !data.isEqual(LocalDate.now()) || s.isAfter(agora))
+                .sorted()
                 .toList();
     }
 
