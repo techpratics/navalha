@@ -16,7 +16,7 @@ pnpm dev
 
 O app estará disponível em `http://localhost:5173`.
 
-> O backend deve estar rodando em `http://localhost:8080` para a integração funcionar. Veja o [Manual do Backend](../Backend/RunBackend.md).
+> O backend deve estar rodando em `http://localhost:8080` para a integração funcionar. Veja a [Referência da API](../docs/api.md).
 
 ---
 

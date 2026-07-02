@@ -1,0 +1,28 @@
+# Applies to any image built with the repository root as build context
+# (currently: Frontend/Dockerfile, see docker-compose.yml).
+
+.git/
+.gitignore
+.gitattributes
+
+# Backend build artifacts (irrelevant to the frontend image, keeps context small)
+Backend/target/
+Backend/*.log
+
+# Frontend build artifacts (rebuilt inside the image)
+Frontend/node_modules/
+Frontend/dist/
+
+# Docs/scripts are not needed inside any image
+docs/
+scripts/
+*.md
+
+# Never send env files or IDE/OS clutter to the Docker daemon
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

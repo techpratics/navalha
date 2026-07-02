@@ -17,4 +17,4 @@ spring:
 
 api:
   security:
-      secret: "${JWT_SECRET:my-secret-key}"
+      secret: "${JWT_SECRET}"

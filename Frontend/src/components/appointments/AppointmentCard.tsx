@@ -23,6 +23,7 @@ const statusConfig = {
   confirmed: { label: 'Confirmado', className: 'bg-green-500/20 text-green-500 border border-green-500/30 mb-4' },
   pending: { label: 'Pendente', className: 'bg-amber-500/20 text-amber-500 border border-amber-500/30' },
   cancelled: { label: 'Cancelado', className: 'bg-red-500/20 text-red-500 border border-red-500/30' },
+  completed: {label: 'Concluido', className: 'bg-blue-500/20 text-blue-500 border border-blue-500/30'},
 }
 
 export default function AppointmentCard({ appointment, view = 'client' }: AppointmentCardProps) {
