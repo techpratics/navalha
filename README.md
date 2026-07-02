@@ -110,19 +110,20 @@ O projeto adota uma arquitetura baseada em API RESTful, separando completamente 
 
 ---
 
-### ⚙️ Backend
-
-Suba o banco de dados e a API com Docker:
+### 🐳 Subindo tudo com Docker (Backend + Banco + Frontend)
 
 ```bash
-cd Backend
-docker compose up --build
+cp .env.example .env   # preencha as variáveis com valores reais
+docker compose up -d --build
 ```
 
-A API estará disponível em `http://localhost:8080`.
-A documentação Swagger estará em `http://localhost:8080/swagger-ui.html`.
+- Frontend (Nginx): `http://localhost`
+- API: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger-ui.html`
 
-[Manual para Rodar Backend](./Backend/RunBackend.md)
+Veja [docs/docker.md](./docs/docker.md) e [docs/environment.md](./docs/environment.md) para detalhes.
+
+[Referência completa da API](./docs/api.md)
 
 ---
 
@@ -144,6 +145,35 @@ pnpm dev
 O frontend estará disponível em `http://localhost:5173`.
 
 [Documentação do Frontend](./Frontend/README.md)
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+.
+├── Backend/          # API Spring Boot (Java 21 + Maven)
+├── Frontend/          # SPA React + Vite + TypeScript (PNPM)
+├── infra/
+│   ├── nginx/          # Config do Nginx usada pela imagem do Frontend
+│   └── cloudflared/    # Template de config do Cloudflare Tunnel (roda no host)
+├── scripts/           # Scripts de deploy/operação (build, deploy, backup, logs...)
+├── docs/               # Documentação de arquitetura, deploy, docker, env e cloudflare
+├── docker-compose.yml
+├── .env.example
+└── README.md
+```
+
+## 📄 Documentação
+
+| Documento | Conteúdo |
+|---|---|
+| [docs/architecture.md](./docs/architecture.md) | Visão geral da arquitetura do sistema |
+| [docs/deploy.md](./docs/deploy.md) | Passo a passo de deploy em produção |
+| [docs/docker.md](./docs/docker.md) | Detalhes dos Dockerfiles e do docker-compose |
+| [docs/environment.md](./docs/environment.md) | Variáveis de ambiente |
+| [docs/cloudflare.md](./docs/cloudflare.md) | Configuração do Cloudflare Tunnel |
+| [docs/api.md](./docs/api.md) | Referência completa das rotas da API |
 
 ---
 

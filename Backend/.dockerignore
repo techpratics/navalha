@@ -1,0 +1,17 @@
+# Build output and IDE/OS files never need to reach the Docker build context.
+target/
+*.log
+
+.idea/
+.vscode/
+*.iml
+
+.git/
+.gitignore
+.gitattributes
+
+Dockerfile
+.dockerignore
+
+.DS_Store
+Thumbs.db

@@ -1,28 +1,21 @@
-# RunBackend.md — Documentação Completa do Backend Navalha
+# Referência da API — Backend Navalha
 
 ## Visão Geral
 
-API REST desenvolvida em **Java 17 + Spring Boot**, banco de dados **PostgreSQL 16**, executada via **Docker Compose**. O sistema gerencia uma barbearia: clientes, profissionais, agendamentos, serviços e planos de assinatura.
+API REST desenvolvida em **Java 21 + Spring Boot**, banco de dados **PostgreSQL 16**, executada via **Docker Compose**. O sistema gerencia uma barbearia: clientes, profissionais, agendamentos, serviços e planos de assinatura.
 
 ---
 
 ## Como Rodar
 
 ```bash
+cp .env.example .env   # preencha os valores reais
 docker compose up --build
 ```
 
-A API sobe na porta **8080**. O banco sobe na porta **5432**.
+A API sobe na porta **8080** (exposta no host). O banco Postgres só é acessível dentro da rede interna do Docker (`postgres:5432`), a menos que uma porta seja explicitamente publicada no `docker-compose.yml`.
 
-### Variáveis de ambiente (definidas no `docker-compose.yml`)
-
-| Variável | Valor |
-|----------|-------|
-| `DATABASE_URL` | `jdbc:postgresql://alabama-db:5432/alabama_barbers_db` |
-| `DB_USERNAME` | `postgres` |
-| `DB_PASSWORD` | `postgres` |
-| `JWT_SECRET` | string longa de 64 chars (definida no compose) |
-| `SPRING_PROFILES_ACTIVE` | `prod` |
+Para a lista completa de variáveis de ambiente, veja [environment.md](./environment.md).
 
 ---
 

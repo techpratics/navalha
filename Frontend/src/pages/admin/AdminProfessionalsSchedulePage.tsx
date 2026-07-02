@@ -9,6 +9,7 @@ const statusConfig = {
   confirmed: { label: 'Confirmado', className: 'bg-green-500/20 text-green-500 border-green-500/30' },
   pending: { label: 'Pendente', className: 'bg-amber-500/20 text-amber-500 border-amber-500/30' },
   cancelled: { label: 'Cancelado', className: 'bg-red-500/20 text-red-500 border-red-500/30' },
+  completed: { label: 'Concluido', className: 'bg-blue-500/20 text-blue-500 border-blue-500/30'},
 }
 
 export default function AdminProfessionalsSchedulePage() {

@@ -1,0 +1,58 @@
+# =========================================================
+# Ambiente / Segredos
+# =========================================================
+.env
+.env.*
+!.env.example
+
+# =========================================================
+# Backend (Java / Maven)
+# =========================================================
+Backend/target/
+Backend/logs/
+Backend/**/*.log
+*.class
+*.jar
+!Backend/.mvn/wrapper/maven-wrapper.jar
+hs_err_pid*
+
+# =========================================================
+# Frontend (Node / Vite / PNPM)
+# =========================================================
+Frontend/node_modules/
+Frontend/dist/
+Frontend/dist-ssr/
+Frontend/coverage/
+Frontend/*.local
+Frontend/npm-debug.log*
+Frontend/pnpm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+
+# =========================================================
+# Docker
+# =========================================================
+# Volumes/dados locais versionados por engano na raiz do projeto
+docker/volumes/
+infra/**/volumes/
+*.pid
+
+# Dumps gerados por scripts/backup.sh
+backups/
+
+# =========================================================
+# IDEs / Editores
+# =========================================================
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# =========================================================
+# Sistema Operacional
+# =========================================================
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,22 @@
+# Example config for `cloudflared` (Cloudflare Tunnel).
+# This service runs on the HOST (systemd/standalone), not inside docker-compose,
+# so it is documented here rather than added as a compose service.
+#
+# Setup:
+#   1. cloudflared tunnel login
+#   2. cloudflared tunnel create navalha
+#   3. Copy this file to ~/.cloudflared/config.yml (or /etc/cloudflared/config.yml)
+#      and fill in the placeholders below.
+#   4. cloudflared tunnel route dns navalha your-domain.example.com
+#   5. cloudflared service install   (or: cloudflared tunnel run navalha)
+#
+# See docs/cloudflare.md for the full walkthrough.
+
+tunnel: <TUNNEL_ID>
+credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  # Points to the Nginx container, which serves the frontend and proxies /api/.
+  - hostname: your-domain.example.com
+    service: http://localhost:80
+  - service: http_status:404

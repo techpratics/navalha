@@ -1,0 +1,100 @@
+# Navalha — orquestração de produção (Postgres + Backend Spring Boot + Frontend/Nginx).
+# O Cloudflare Tunnel roda no host (fora deste compose) e aponta para o Nginx
+# na porta 80. Veja infra/cloudflared/ e docs/cloudflare.md.
+#
+# Uso:
+#   cp .env.example .env   # preencha os valores reais
+#   docker compose up -d --build
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: alabama_postgres
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - alabama-network
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+
+    container_name: alabama_backend
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    healthcheck:
+      # 127.0.0.1 (não "localhost") evita falha por resolução IPv6 no Alpine.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/v3/api-docs"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+    networks:
+      - alabama-network
+
+  frontend:
+    build:
+      # Contexto na raiz do repositório para poder copiar infra/nginx/frontend.conf.
+      context: .
+      dockerfile: Frontend/Dockerfile
+
+    container_name: alabama_frontend
+
+    restart: unless-stopped
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    ports:
+      - "80:80"
+
+    healthcheck:
+      # 127.0.0.1 (não "localhost") evita falha por resolução IPv6 no Alpine.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - alabama-network
+
+volumes:
+  postgres_data:
+
+networks:
+  alabama-network:
